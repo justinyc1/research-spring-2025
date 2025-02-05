@@ -1,4 +1,4 @@
-package javaCode;
+package javacode;
 import java.util.List;
 import java.util.ArrayList;
 /*

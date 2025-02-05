@@ -1,4 +1,4 @@
-package javaCode;
+package javacode;
 
 public class ProjectException extends Exception {
     public ProjectException(String message) {
