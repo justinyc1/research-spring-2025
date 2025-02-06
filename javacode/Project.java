@@ -1,5 +1,11 @@
 package javacode; // **remove this if this file is NOT in a folder called 'javacode'
 
+/* TODO: 
+ * look into exceptional cycles
+ * extract code into methods
+ * 
+ */
+
 //===== libraries that are used for this program =====
 import java.util.Set;
 import java.util.List;
@@ -35,18 +41,54 @@ public class Project {
         // System.out.println(Z_mod_m_Z.toString()); //DEBUG
         // System.out.println(Z_mod_m_Z_star.toString()); //DEBUG
 
+
         // deal with B_m^n and U_m^n where n:
         int n = (2 * d) - 2;
         // the U set contains alpha sets, where each alpha set 
         // for set alpha, range of each term: 1 <= a_i <= m-1
         int alpha_length = n + 2; // a_0, a_1, ... a_n, a_n+1
 
-        Set<Tuple<Integer>> U_set = new HashSet<>(); // contains all valid alpha sets
-
+        Set<Tuple<Integer>> U_set = new HashSet<>(); // contains all alpha sets that are valid for the U set
         find_all_valid_alpha_combinations(U_set, Z_mod_m_Z, m, alpha_length);
+        // by this point the U_set will have all valid alpha tuples
 
-        System.out.println("Print U set: " + U_set);
-        System.out.println("U set size:" + U_set.size());
+
+        // B_m^n := {alpha in U_m^n such that |t * alpha| = n/2 +1 for all t in Z/mZ*}
+        Set<Tuple<Integer>> B_set = new HashSet<>(); // contains all alpha sets that are valid for the B set
+        int n_halved_plus_one = (n / 2) + 1;
+        System.out.println("n/2 + 1 = " + n_halved_plus_one);
+
+        // TODO: could use regular for loops for slightly faster time
+        for (Tuple<Integer> alpha_tuple : U_set) {
+            boolean this_alpha_tuple_is_valid = true;
+            for (int t : Z_mod_m_Z_star) {
+
+                List<Integer> t_times_alpha_reduced_elements = new ArrayList<>();
+                double t_times_alpha_reduced_sum = 0;
+
+                for (int i = 0; i < alpha_tuple.size(); ++i) {
+                    int reduced_mod_m = (t * alpha_tuple.get(i)) % m;
+                    t_times_alpha_reduced_elements.add(reduced_mod_m);
+                    t_times_alpha_reduced_sum += reduced_mod_m;
+                }
+                t_times_alpha_reduced_sum /= m;
+
+                System.out.println("for tuple " + alpha_tuple + " and t = " + t + ", t*a = " + t_times_alpha_reduced_elements + " and |t*a| = " + t_times_alpha_reduced_sum);//DEBUG
+                if (t_times_alpha_reduced_sum != n_halved_plus_one) {
+                    this_alpha_tuple_is_valid = false;
+                    break; // if |t * alpha| != n/2 +1 for just one t, this alpha tuple is not valid for the B set
+                }
+            }
+            if (this_alpha_tuple_is_valid) {
+                B_set.add(alpha_tuple);
+            }
+        }
+
+        // System.out.println("Print U set: " + U_set); //DEBUG
+        System.out.println("U set size: " + U_set.size()); //DEBUG
+        
+        System.out.println("Print B set: " + B_set); //DEBUG
+        System.out.println("B set size: " + B_set.size()); //DEBUG
 
         System.out.println("method validate_set_V(" + m + ", " + d + ") ran to completion.");
         return;
