@@ -67,7 +67,7 @@ public class Tuple<E> {
         return newList;
     }
 
-    /** Compares a tuple to another object and returns true if both tuples are equal
+    /** Compares a tuple to another object and returns true if both tuples are equal, equal as in for tuples a and b, a_i = b_i for all i
      * 
      */
     @SuppressWarnings("unchecked")
