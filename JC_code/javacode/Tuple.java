@@ -1,4 +1,4 @@
-package javacode;
+package JC_code.javacode;
 
 import java.util.List;
 import java.util.ArrayList;
