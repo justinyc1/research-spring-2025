@@ -1,4 +1,4 @@
-package javacode; // **remove this if this file is NOT in a folder called 'javacode'
+package JC_code.javacode; // **remove this if this file is NOT in a folder called 'javacode'
 
 /* TODO: 
  * look into exceptional cycles
@@ -16,23 +16,23 @@ import java.util.ArrayList;
 public class Project {
     public static void main(String[] args) throws ProjectException {
         // validate_set_V(5, 2);
-        // validate_set_V(9, 2);
+        validate_set_V(9, 2);
         // validate_set_V(15, 2);
         
         // validate_set_V(21, 2);
 
-        Scanner sc = new Scanner(System.in);
-        sc.useDelimiter("\\R"); // a single enter press is now the separator.
-        for (int i = 5; i < 200; ++i) { 
-            for (int j = 2; j <= i/2 - 1; ++j) {    
-                try {
-                    validate_set_V(i, j); // m = 21, 2 <= d <= 8 is very interesting
-                } catch (ProjectException e) {
-                    continue;
-                }
-                sc.next();
-            }
-        }
+        // Scanner sc = new Scanner(System.in);
+        // sc.useDelimiter("\\R"); // a single enter press is now the separator.
+        // for (int i = 5; i < 200; ++i) { 
+        //     for (int j = 2; j <= i/2 - 1; ++j) {    
+        //         try {
+        //             validate_set_V(i, j); // m = 21, 2 <= d <= 8 is very interesting
+        //         } catch (ProjectException e) {
+        //             continue;
+        //         }
+        //         sc.next();
+        //     }
+        // }
 
         // System.out.println(nCr(3, 1));
         // System.out.println(nCr(3, 2));
@@ -44,7 +44,7 @@ public class Project {
      * @param d - An positive integer in the range: 1 <= d <= (m-1)/2
      */
     public static void validate_set_V(int m, int d) throws ProjectException {
-        System.out.println("Running method validate_set_V(" + m + ", " + d + "):\n");
+        System.out.println("Running method validate_set_V(\u001b[31mm = " + m + "\u001b[0m, \u001b[31md = " + d + "\u001b[0m):\n");
         validate_m_and_d(m, d);
 
         //TODO: extract this section into a method
@@ -58,8 +58,8 @@ public class Project {
             }
         }
 
-        // System.out.println(Z_mod_m_Z.toString()); //DEBUG
-        // System.out.println(Z_mod_m_Z_star.toString()); //DEBUG
+        System.out.println(Z_mod_m_Z.toString()); //DEBUG
+        System.out.println(Z_mod_m_Z_star.toString()); //DEBUG
 
 
         // deal with B_m^n and U_m^n where n:
@@ -113,7 +113,7 @@ public class Project {
             V_set.add(tuple); // every tuple in B set is already in ascending order
         }
 
-
+        //TODO: can we find pairs by indices? i.e. a_i and a_(n-i) are pairs or there are no pairs
         /* Exceptional Cycles:
          *   an exceptional cycle is a tuple that is not coming exclusively from pairs that add to m
          *   example: for tuple (1,4,6,7), it does not contain exclusively pairs that add to m, in fact there are no pairs that add to m at all
@@ -215,7 +215,7 @@ public class Project {
             this_combination.add((int)ZmmZ_array[i]);
             sum += (int)ZmmZ_array[i];
 
-            // if (this_combination.size() == alpha_length) System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
+            if (this_combination.size() == alpha_length) System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
             if (this_combination.size() == alpha_length && sum % m == 0) U_set.add(new Tuple<Integer>(this_combination));
             
             recursively_find_all(U_set, ZmmZ_array, m, alpha_length, this_combination, sum, i+1, depth+1);
