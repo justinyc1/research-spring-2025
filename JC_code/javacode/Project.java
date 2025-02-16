@@ -28,10 +28,10 @@ import java.util.ArrayList;
 public class Project {
     public static void main(String[] args) throws ProjectException {
         // validate_set_V(5, 2);
-        validate_set_V(9, 2);
+        // validate_set_V(9, 2);
         // validate_set_V(15, 2);
         
-        // validate_set_V(21, 2);
+        validate_set_V(35, 3);
 
         // test_all_m_and_d_combinations();
     }
@@ -58,8 +58,7 @@ public class Project {
      * @param d - An positive integer in the range: 1 <= d <= (m-1)/2
      */
     public static void validate_set_V(int m, int d) throws ProjectException {
-        String redL = "\u001b[31m", redR = "\u001b[0m";
-        System.out.println("Running method validate_set_V(" + redL + "m = " + m + "" + redR + ", " + redL + "d = " + d + "" + redR + "):\n");
+        System.out.println("Running method validate_set_V(" + redString("m = ", m) + ", " + redString("d = ", d) + "):\n");
         validate_m_and_d(m, d);
 
         //TODO: extract this section into a method
@@ -140,10 +139,11 @@ public class Project {
         
         Set<Tuple<Integer>> all_are_pairs = new HashSet<>();  // contains all tuples from the V set that have  ONLY PAIRS  adding up to m
         Set<Tuple<Integer>> some_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  SOME PAIRS  adding up to m (but not all pairs)
-        Set<Tuple<Integer>> exceptional_cycles = some_are_pairs;   // exceptional cycles are tuples that have  SOME PAIRS  adding up to m
         Set<Tuple<Integer>> none_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  NO PAIRS    adding up to m
         Set<Tuple<Integer>> indecomposable = new HashSet<>(); // contains all tuples from the V set that have  NO SUBSETS  adding up to m
-        // TODO: IMPLEMENT CODE FOR INDECOMPOSABLE!!
+        Set<Tuple<Integer>> exceptional_cycles = new HashSet<>(); // contains all tuples from the V set that are not made up of exclusively pairs
+        // TODO: check code for indecomposable; check indecomposable definitions
+        populate_indecomposable(V_set, indecomposable, m);
         
         // TODO: should be a way to make this faster? (actually prob not)
         for (Tuple<Integer> tuple : V_set) { // for each tuple
@@ -181,14 +181,16 @@ public class Project {
 
             if (has_all_pairs) { // has_all_pairs remains true if every element has a pair
                 all_are_pairs.add(tuple);
-            } else if (has_one_pair) { // otherwise if there is at least one pair (but not all elements are pairs) then SOME elements are pairs
-                some_are_pairs.add(tuple);
-                // same as exceptional_cycles.add(tuple);
-            } else if (has_no_subsets) { // otherwise theres no pairs if theres no subsets adding to multiple of m, then there must be no pairs adding to m
-                indecomposable.add(tuple);
-                none_are_pairs.add(tuple);
-            } else if (has_no_pairs) { // if no pairs but has subsets, then only add to the no pairs set
-                none_are_pairs.add(tuple);
+            } else { // not every element have a pair:
+                exceptional_cycles.add(tuple);
+                if (has_one_pair) { // if there is at least one pair (but not all elements are pairs) then SOME elements are pairs
+                    some_are_pairs.add(tuple);
+                } else if (has_no_subsets) { // otherwise theres no pairs if theres no subsets adding to multiple of m, then there must be no pairs adding to m
+                    indecomposable.add(tuple);
+                    none_are_pairs.add(tuple);
+                } else if (has_no_pairs) { // if no pairs but has subsets, then only add to the no pairs set
+                    none_are_pairs.add(tuple);
+                }
             }
         }
 
@@ -221,30 +223,46 @@ public class Project {
         }
 */
 
-        System.out.println("Maximum alpha tuple combinations possible for the U set: " + factorial(Z_mod_m_Z.size() - 1));
+        System.out.println();
+        System.out.println("Print \"reduced\" " + redString("U") + " set (contains " + redString(U_set.size()) + " tuples): " + U_set); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print \"reduced\" " + redString("B") + " set (contains " + redString(B_set.size()) + " tuples): " + B_set); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print " + redString("V") + " set (contains " + redString(V_set.size()) + " tuples): " + V_set); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print " + redString("all") + "_are_pairs" + " (contains " + redString(all_are_pairs.size()) + " tuples): " + all_are_pairs); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print " + redString("some") + "_are_pairs" + " (contains " + redString(some_are_pairs.size()) + " tuples): " + some_are_pairs); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print " + redString("none") + "_are_pairs" + " (contains " + redString(none_are_pairs.size()) + " tuples): " + none_are_pairs); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print " + redString("indecomposable") + " (contains " + redString(indecomposable.size()) + " tuples): " + indecomposable); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print " + redString("exceptional") + " cycles (contains " + redString(exceptional_cycles.size()) + " tuples): " + exceptional_cycles); //DEBUG
 
         System.out.println();
-        System.out.println("Print \"reduced\" " + redL + "U" + redR + " set (contains " + redL + "" + U_set.size() + "" + redR + " tuples): " + U_set); //DEBUG
-        
-        System.out.println();
-        System.out.println("Print \"reduced\" " + redL + "B" + redR + " set (contains " + redL + "" + B_set.size() + "" + redR + " tuples): " + B_set); //DEBUG
-        
-        System.out.println();
-        System.out.println("Print " + redL + "V" + redR + " set (contains " + redL + "" + V_set.size() + "" + redR + " tuples): " + V_set); //DEBUG
-        
-        System.out.println();
-        System.out.println("Print " + redL + "all"  + redR + "_are_pairs" + " (contains " + redL + "" + all_are_pairs.size() + "" + redR + " tuples): " + all_are_pairs); //DEBUG
-        
-        System.out.println();
-        System.out.println("Print " + redL + "some" + redR + "_are_pairs (aka " + redL + "exceptional" + redR + " cycles)" + " (contains " + redL + "" + some_are_pairs.size() + "" + redR + " tuples): " + some_are_pairs); //DEBUG
-        
-        System.out.println();
-        System.out.println("Print " + redL + "none" + redR + "_are_pairs" + " (contains " + redL + "" + none_are_pairs.size() + "" + redR + " tuples): " + none_are_pairs); //DEBUG
-        
-        System.out.println();
-        System.out.println("Print " + redL + "indecomposable" + redR + " (contains " + redL + "" + indecomposable.size() + "" + redR + " tuples): " + indecomposable); //DEBUG
 
-        System.out.println("\nmethod validate_set_V(" + redL + m + redR + ", " + redL + d + redR + ") ran to completion.");
+        // extra summary section, for when sets gets too large (using space for spacing/aligning instead of printf)
+        System.out.println("Summary:");
+        System.out.println("given " + redString("m = ", m) + ", " + redString("d = ", d));
+        System.out.println(redString("Maximum") + " alpha tuple combinations possible for the U set: " + factorial(Z_mod_m_Z.size() - 1));
+        System.out.println("       " +"\"reduced\" " + redString("U") + " set: contains " + redString(U_set.size()) + " tuples");
+        System.out.println("       " + "\"reduced\" " + redString("B") + " set: contains " + redString(B_set.size()) + " tuples");
+        System.out.println("                 " + redString("V") + " set: contains " + redString(V_set.size()) + " tuples");
+        System.out.println("     " + redString("all") + "_are_pairs" + " set: contains " + redString(all_are_pairs.size()) + " tuples");
+        System.out.println("    " + redString("some") + "_are_pairs" + " set: contains " + redString(some_are_pairs.size()) + " tuples");
+        System.out.println("    " + redString("none") + "_are_pairs" + " set: contains " + redString(none_are_pairs.size()) + " tuples");
+        System.out.println("    " + redString("indecomposable") + " set: contains " + redString(indecomposable.size()) + " tuples");
+        System.out.println(redString("exceptional") + "_cycles" + " set: contains " + redString(exceptional_cycles.size()) + " tuples");
+
+        System.out.println("\nmethod validate_set_V(" + redString(m) + ", " + redString(d) + ") ran to completion.");
         return;
     }
 
@@ -272,9 +290,7 @@ public class Project {
      */
     public static void find_all_valid_alpha_combinations(Set<Tuple<Integer>> U_set, Set<Integer> Z_mod_m_Z, int m, int alpha_length) {
         Object[] ZmmZ_array = Z_mod_m_Z.toArray();
-        List<Integer> this_combination = new ArrayList<>();
-        int sum = 0;
-        recursively_find_all(U_set, ZmmZ_array, m, alpha_length, this_combination, sum, 1, 1);
+        recursively_find_all(U_set, ZmmZ_array, m, alpha_length, new ArrayList<>(), 0, 1, 1);
     }
 
     /** Recursively find all valid ascending combinations of alpha tuple, using the values of Z/mZ (excluding 0)
@@ -295,7 +311,7 @@ public class Project {
             this_combination.add((int)ZmmZ_array[i]);
             sum += (int)ZmmZ_array[i];
 
-            if (this_combination.size() == alpha_length) System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
+            // if (this_combination.size() == alpha_length) System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
             if (this_combination.size() == alpha_length && sum % m == 0) U_set.add(new Tuple<Integer>(this_combination));
             
             recursively_find_all(U_set, ZmmZ_array, m, alpha_length, this_combination, sum, i+1, depth+1);
@@ -303,6 +319,48 @@ public class Project {
             this_combination.remove((Integer)ZmmZ_array[i]);
             sum -= (int)ZmmZ_array[i];
         }
+    }
+
+    public static void populate_indecomposable(Set<Tuple<Integer>> V_set, Set<Tuple<Integer>> indecomposable, int m) {
+        for (Tuple<Integer> tuple : V_set) {
+            boolean has_subset = is_indecomposable_recursively(indecomposable, m, tuple, new ArrayList<Integer>(), 0, 0, 1);
+            if (!has_subset) {
+                indecomposable.add(tuple);
+            }
+        }
+    }
+
+    private static boolean is_indecomposable_recursively(Set<Tuple<Integer>> indecomposable, int m, Tuple<Integer> tuple, List<Integer> this_combination, int sum, int begin, int depth) {
+        // only return true if subset found, else return false
+        if (depth >= tuple.size()) return false;
+
+        int size = tuple.size();
+        for (int i = begin; i < size; ++i) {
+            this_combination.add(tuple.get(i));
+            sum += tuple.get(i);
+
+            // System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
+            if (size % 2 == 0 && sum % m == 0) return true; // check if sum of tuple up to this element divides m
+
+            // if not, check if any subsets that includes this subset is valid:
+            if (is_indecomposable_recursively(indecomposable, m, tuple, this_combination, sum, i+1, depth+1)) return true;
+            
+            // none of subsets that includes this subset is valid, remove some elements and try other ones
+            this_combination.remove(tuple.get(i));
+            sum -= tuple.get(i);
+        }
+        return false;
+    }
+
+    public static String redString(Object obj) {
+        String str = "";
+        if (obj instanceof String) str = obj.toString();
+        if (obj instanceof Integer) str = String.valueOf(obj);
+        return "\u001b[31m" + str + "\u001b[0m";
+    }
+    
+    public static String redString(String str, int num) {
+        return "\u001b[31m" + str + num + "\u001b[0m";
     }
 
     /** Return the gcd of a and b using the euclidean algorithm
@@ -316,12 +374,12 @@ public class Project {
         return gcd(b % a, a);
     }
 
-    public static int factorial(int n) {
+    public static long factorial(int n) {
         if (n == 1) return 1;
         return n * factorial(n-1);
     }
 
-    public static int nCr(int n, int r) {
+    public static long nCr(int n, int r) {
         return factorial(n)/(factorial(r) * factorial(n-r));
     }
 }
