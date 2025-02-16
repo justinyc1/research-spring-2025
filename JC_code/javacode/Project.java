@@ -4,8 +4,20 @@ package JC_code.javacode; // **remove this if this file is NOT in a folder calle
  * look into exceptional cycles
  * extract code into methods
  * 
+ * Write code that can identify all indecomposable cycles in V^d_m.
+ * Generate some data, for example:
+ *   Start with m = p, where p is prime, How large can p get before the computation time is too much? Would we get any exceptional cycles? (we shouldn’t?) Are there indecomposable elements? (there shouldn’t be?)
+ *   Try m = p^2, where p is prime. (i.e. m = 9). How many exceptional cycles would we see, and for what values of d? Are there any patterns?
+ *   Are there patterns if we fix the prime p and consider m = p, p^2, p^3, ...
+ * Try to convert the recursive algorithm for finding all d-length ascending-order combinations for the set U^n_m into an iterative algorithm.
+ * Think about ways to ’remember’ data to possibly increase efficiency and for data reusability.
+ * Try to optimize the code in any reasonable way for better time efficiency.
+ * Consider outputting program runtime to keep track of time efficiency as inputs gets larger.
+ * Consider trying to identify the time complexity of the algorithms.
+ * Explore the second conjecture, possibly writing some code that can test it.
+ * Organize the GitHub repository.
+ * 
  */
-
 //===== libraries that are used for this program =====
 import java.util.Set;
 import java.util.List;
@@ -21,21 +33,23 @@ public class Project {
         
         // validate_set_V(21, 2);
 
-        // Scanner sc = new Scanner(System.in);
-        // sc.useDelimiter("\\R"); // a single enter press is now the separator.
-        // for (int i = 5; i < 200; ++i) { 
-        //     for (int j = 2; j <= i/2 - 1; ++j) {    
-        //         try {
-        //             validate_set_V(i, j); // m = 21, 2 <= d <= 8 is very interesting
-        //         } catch (ProjectException e) {
-        //             continue;
-        //         }
-        //         sc.next();
-        //     }
-        // }
+        // test_all_m_and_d_combinations();
+    }
 
-        // System.out.println(nCr(3, 1));
-        // System.out.println(nCr(3, 2));
+    public static void test_all_m_and_d_combinations() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Press the Enter Key to process the next m and d values");
+        sc.useDelimiter("\\R"); // a single enter press is now the separator.
+        for (int i = 5; i < 200; ++i) { 
+            for (int j = 2; j <= i/2 - 1; ++j) {    
+                try {
+                    validate_set_V(i, j); // m = 21, 2 <= d <= 8 is very interesting
+                } catch (ProjectException e) {
+                    continue;
+                }
+                sc.next();
+            }
+        }
     }
 
     /**
@@ -44,7 +58,8 @@ public class Project {
      * @param d - An positive integer in the range: 1 <= d <= (m-1)/2
      */
     public static void validate_set_V(int m, int d) throws ProjectException {
-        System.out.println("Running method validate_set_V(\u001b[31mm = " + m + "\u001b[0m, \u001b[31md = " + d + "\u001b[0m):\n");
+        String redL = "\u001b[31m", redR = "\u001b[0m";
+        System.out.println("Running method validate_set_V(" + redL + "m = " + m + "" + redR + ", " + redL + "d = " + d + "" + redR + "):\n");
         validate_m_and_d(m, d);
 
         //TODO: extract this section into a method
@@ -121,26 +136,82 @@ public class Project {
          * 
          *   guess: if m is prime, there are no exceptional cycles
          */
-        Set<Tuple<Integer>> exceptional_cycles = new HashSet<>(); // contains all tuples from the V set that are exceptional cycles
+        
+        
+        Set<Tuple<Integer>> all_are_pairs = new HashSet<>();  // contains all tuples from the V set that have  ONLY PAIRS  adding up to m
+        Set<Tuple<Integer>> some_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  SOME PAIRS  adding up to m (but not all pairs)
+        Set<Tuple<Integer>> exceptional_cycles = some_are_pairs;   // exceptional cycles are tuples that have  SOME PAIRS  adding up to m
+        Set<Tuple<Integer>> none_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  NO PAIRS    adding up to m
+        Set<Tuple<Integer>> indecomposable = new HashSet<>(); // contains all tuples from the V set that have  NO SUBSETS  adding up to m
+        // TODO: IMPLEMENT CODE FOR INDECOMPOSABLE!!
+        
         // TODO: should be a way to make this faster? (actually prob not)
         for (Tuple<Integer> tuple : V_set) { // for each tuple
             // System.out.println("for tuple " + tuple); //DEBUG
 
-            for (int i = 0; i < tuple.size(); ++i) { // for an element at i
-                boolean ith_tuple_has_pair = false;
+            // some boolean variables to keep track of each tuple's traits
+            boolean has_all_pairs = true;  // assume true, if any element don't have a pair, set to false
+            boolean has_one_pair = false; // assume false, if any element have a pair, set to true
+            boolean has_no_pairs = true;   // assume true, if any element have a pair, set to false
+            boolean has_no_subsets = true; // assume true, if any subset adds to a multiple of m, set to false
+            // TODO: has_one_pair and has_all_pair are inverses; A = B'
+
+            for (int i = 0; i < tuple.size(); ++i) { // for an element at i of tuple
+                boolean ith_element_has_pair = false;
 
                 // for any element at i, j loop makes sure to set ith_element_has_pair to true if found a pair, or ith_element_has_pair remains false, which means the tuple is an exceptional cycle
                 for (int j = 0; j < tuple.size(); ++j) { // check every element (as j)
                     // System.out.print("  at i: " + tuple.get(i) + "  at j: " + tuple.get(j) + "  and m = " + m); //DEBUG
                     if ((tuple.get(i) + tuple.get(j)) % m == 0) {
                         // System.out.println("   PAIR FOUND"); //DEBUG
-                        ith_tuple_has_pair = true;
+                        ith_element_has_pair = true;
                         break;
                     }
                     // System.out.println();
                 }
 
-                if (!ith_tuple_has_pair) {
+                if (ith_element_has_pair) { // if just one element has a pair then
+                    has_no_pairs = false; 
+                    has_one_pair = true; // we assume theres at least one pair
+                } else { // an element don't have a pair
+                    has_all_pairs = false;
+                }
+
+            }
+
+            if (has_all_pairs) { // has_all_pairs remains true if every element has a pair
+                all_are_pairs.add(tuple);
+            } else if (has_one_pair) { // otherwise if there is at least one pair (but not all elements are pairs) then SOME elements are pairs
+                some_are_pairs.add(tuple);
+                // same as exceptional_cycles.add(tuple);
+            } else if (has_no_subsets) { // otherwise theres no pairs if theres no subsets adding to multiple of m, then there must be no pairs adding to m
+                indecomposable.add(tuple);
+                none_are_pairs.add(tuple);
+            } else if (has_no_pairs) { // if no pairs but has subsets, then only add to the no pairs set
+                none_are_pairs.add(tuple);
+            }
+        }
+
+/* BACKUP FOR CODE FOR EXCEPTIONAL CYCLES
+        // TODO: should be a way to make this faster? (actually prob not)
+        for (Tuple<Integer> tuple : V_set) { // for each tuple
+            // System.out.println("for tuple " + tuple); //DEBUG
+
+            for (int i = 0; i < tuple.size(); ++i) { // for an element at i of tuple
+                boolean ith_element_has_pair = false;
+
+                // for any element at i, j loop makes sure to set ith_element_has_pair to true if found a pair, or ith_element_has_pair remains false, which means the tuple is an exceptional cycle
+                for (int j = 0; j < tuple.size(); ++j) { // check every element (as j)
+                    // System.out.print("  at i: " + tuple.get(i) + "  at j: " + tuple.get(j) + "  and m = " + m); //DEBUG
+                    if ((tuple.get(i) + tuple.get(j)) % m == 0) {
+                        // System.out.println("   PAIR FOUND"); //DEBUG
+                        ith_element_has_pair = true;
+                        break;
+                    }
+                    // System.out.println();
+                }
+
+                if (!ith_element_has_pair) {
                     exceptional_cycles.add(tuple);
                     break;
                 }
@@ -148,23 +219,32 @@ public class Project {
             }
 
         }
-
+*/
 
         System.out.println("Maximum alpha tuple combinations possible for the U set: " + factorial(Z_mod_m_Z.size() - 1));
 
         System.out.println();
-        System.out.println("Print \"reduced\" \u001b[31mU\u001b[0m set (contains \u001b[31m" + U_set.size() + "\u001b[0m tuples): " + U_set); //DEBUG
+        System.out.println("Print \"reduced\" " + redL + "U" + redR + " set (contains " + redL + "" + U_set.size() + "" + redR + " tuples): " + U_set); //DEBUG
         
         System.out.println();
-        System.out.println("Print \"reduced\" \u001b[31mB\u001b[0m set (contains \u001b[31m" + B_set.size() + "\u001b[0m tuples): " + B_set); //DEBUG
+        System.out.println("Print \"reduced\" " + redL + "B" + redR + " set (contains " + redL + "" + B_set.size() + "" + redR + " tuples): " + B_set); //DEBUG
         
         System.out.println();
-        System.out.println("Print \u001b[31mV\u001b[0m set (contains \u001b[31m" + V_set.size() + "\u001b[0m tuples): " + V_set); //DEBUG
+        System.out.println("Print " + redL + "V" + redR + " set (contains " + redL + "" + V_set.size() + "" + redR + " tuples): " + V_set); //DEBUG
         
         System.out.println();
-        System.out.println("Print \u001b[31mexceptional cycles\u001b[0m (contains \u001b[31m" + exceptional_cycles.size() + "\u001b[0m tuples): " + exceptional_cycles); //DEBUG
+        System.out.println("Print " + redL + "all"  + redR + "_are_pairs" + " (contains " + redL + "" + all_are_pairs.size() + "" + redR + " tuples): " + all_are_pairs); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print " + redL + "some" + redR + "_are_pairs (aka " + redL + "exceptional" + redR + " cycles)" + " (contains " + redL + "" + some_are_pairs.size() + "" + redR + " tuples): " + some_are_pairs); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print " + redL + "none" + redR + "_are_pairs" + " (contains " + redL + "" + none_are_pairs.size() + "" + redR + " tuples): " + none_are_pairs); //DEBUG
+        
+        System.out.println();
+        System.out.println("Print " + redL + "indecomposable" + redR + " (contains " + redL + "" + indecomposable.size() + "" + redR + " tuples): " + indecomposable); //DEBUG
 
-        System.out.println("\nmethod validate_set_V(" + m + ", " + d + ") ran to completion.");
+        System.out.println("\nmethod validate_set_V(" + redL + m + redR + ", " + redL + d + redR + ") ran to completion.");
         return;
     }
 
