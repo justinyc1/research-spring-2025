@@ -94,7 +94,7 @@ def indecomposable(m, d, no_pairs):
     for e_tuple in no_pairs:
         for i in range(1, d):
             if e_tuple in no_pairs:
-                for combo in combinations(e_tuple, d):
+                for combo in combinations(e_tuple, i):
                     if sum(combo) % m == 0:
                         tuple_list.remove(e_tuple)
                         break
