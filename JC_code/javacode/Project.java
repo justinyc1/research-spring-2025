@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.List;
 import java.util.Scanner;
 import java.util.HashSet;
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 public class Project {
@@ -31,9 +32,9 @@ public class Project {
         // validate_set_V(9, 2);
         // validate_set_V(15, 2);
         
-        validate_set_V(35, 3);
+        // validate_set_V(25, 4);
 
-        // test_all_m_and_d_combinations();
+        test_all_m_and_d_combinations();
     }
 
     public static void test_all_m_and_d_combinations() {
@@ -41,14 +42,14 @@ public class Project {
         System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\\R"); // a single enter press is now the separator.
         for (int i = 5; i < 200; ++i) { 
-            for (int j = 2; j <= i/2 - 1; ++j) {    
+            // for (int j = 2; j <= i/2 - 1; ++j) {    
                 try {
-                    validate_set_V(i, j); // m = 21, 2 <= d <= 8 is very interesting
+                    validate_set_V(i, 2); // m = 21, 2 <= d <= 8 is very interesting
                 } catch (ProjectException e) {
                     continue;
                 }
                 sc.next();
-            }
+            // } 
         }
     }
 
@@ -78,8 +79,8 @@ public class Project {
 
         // deal with B_m^n and U_m^n where n:
         int n = (2 * d) - 2;
-        // the U set contains alpha sets, where each alpha set 
-        // for set alpha, range of each term: 1 <= a_i <= m-1
+        // the U set contains alpha tuples, where each alpha tuple 
+        // for alpha tuple, range of each term: 1 <= a_i <= m-1
         int alpha_length = n + 2; // a_0, a_1, ... a_n, a_n+1
 
         Set<Tuple<Integer>> U_set = new HashSet<>(); // contains all alpha tuples that are valid for the U set
@@ -140,7 +141,7 @@ public class Project {
         Set<Tuple<Integer>> all_are_pairs = new HashSet<>();  // contains all tuples from the V set that have  ONLY PAIRS  adding up to m
         Set<Tuple<Integer>> some_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  SOME PAIRS  adding up to m (but not all pairs)
         Set<Tuple<Integer>> none_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  NO PAIRS    adding up to m
-        Set<Tuple<Integer>> indecomposable = new HashSet<>(); // contains all tuples from the V set that have  NO SUBSETS  adding up to m
+        Set<Tuple<Integer>> indecomposable = new HashSet<>(); // contains all tuples from the V set that have  NO SUBStuples adding up to m
         Set<Tuple<Integer>> exceptional_cycles = new HashSet<>(); // contains all tuples from the V set that are not made up of exclusively pairs
         // TODO: check code for indecomposable; check indecomposable definitions
         populate_indecomposable(V_set, indecomposable, m);
@@ -222,7 +223,7 @@ public class Project {
 
         }
 */
-
+/*
         System.out.println();
         System.out.println("Print \"reduced\" " + redString("U") + " set (contains " + redString(U_set.size()) + " tuples): " + U_set); //DEBUG
         
@@ -248,11 +249,13 @@ public class Project {
         System.out.println("Print " + redString("exceptional") + " cycles (contains " + redString(exceptional_cycles.size()) + " tuples): " + exceptional_cycles); //DEBUG
 
         System.out.println();
+*/
 
         // extra summary section, for when sets gets too large (using space for spacing/aligning instead of printf)
         System.out.println("Summary:");
         System.out.println("given " + redString("m = ", m) + ", " + redString("d = ", d));
-        System.out.println(redString("Maximum") + " alpha tuple combinations possible for the U set: " + factorial(Z_mod_m_Z.size() - 1));
+        System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size ", 2*d) + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
+        System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size 1 to ", 2*d) + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
         System.out.println("       " +"\"reduced\" " + redString("U") + " set: contains " + redString(U_set.size()) + " tuples");
         System.out.println("       " + "\"reduced\" " + redString("B") + " set: contains " + redString(B_set.size()) + " tuples");
         System.out.println("                 " + redString("V") + " set: contains " + redString(V_set.size()) + " tuples");
@@ -363,6 +366,12 @@ public class Project {
         return "\u001b[31m" + str + num + "\u001b[0m";
     }
 
+    public static String find_num_of_ascending_nonrepeating_tuples_in_U_set(Set<Integer> Z_mod_m_Z, int d) {
+        BigInteger result = nCr(BigInteger.valueOf(Z_mod_m_Z.size()-1), BigInteger.valueOf(2*d));
+        String str = result.toString();
+        return str;
+    }
+
     /** Return the gcd of a and b using the euclidean algorithm
      * 
      * @param a - an integer
@@ -374,12 +383,15 @@ public class Project {
         return gcd(b % a, a);
     }
 
-    public static long factorial(int n) {
-        if (n == 1) return 1;
-        return n * factorial(n-1);
+    public static BigInteger factorial(BigInteger n) {
+        if (n.compareTo(BigInteger.ONE) == -1) return BigInteger.ONE;
+        return n.multiply(factorial(n.subtract(BigInteger.ONE)));
     }
 
-    public static long nCr(int n, int r) {
-        return factorial(n)/(factorial(r) * factorial(n-r));
+    public static BigInteger nCr(BigInteger n, BigInteger r) {
+        BigInteger numer = factorial(n);
+        BigInteger denom = (factorial(r).multiply(factorial(n.subtract(r))));
+        // System.out.println(numer + ", " + denom); //DEBUG
+        return numer.divide(denom);
     }
 }
