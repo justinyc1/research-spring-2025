@@ -1,7 +1,7 @@
 """
-author -- Sabeeha Malikah
-date -- 3/9/25
-Description -- Post Meeting on 3/3/25
+@author Sabeeha Malikah
+@date 3/9/25
+@Description Post Meeting on 3/3/25
     Changes:
         - The U set only generates tuples whose dth element is <= (m-1)/2
             * This was an observation made by Justin about the V set (we have not proven it yet).
