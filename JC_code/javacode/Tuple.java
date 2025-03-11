@@ -5,25 +5,35 @@ import java.util.ArrayList;
 
 /** Tuple: A collection of elements that is: finite, ordered, immutable, fixed-length, allows repetition, and of type integer
  */
-public class Tuple<E> implements Comparable<E> {
-    private final E[] elements; // final: can't be change once assigned an to an array 
-    public static Tuple<Integer> EMPTY_INTEGER_TUPLE = new Tuple<>(0);
+public class Tuple implements Comparable<Tuple> {
+    private final int[] elements; // final: can't be change once assigned an to an array 
+    public static Tuple EMPTY_TUPLE = new Tuple(0);
 
-    @SuppressWarnings("unchecked")
     private Tuple(int capacity) {
-        elements = (E[]) new Object[capacity];
+        elements = new int[capacity];
     }
 
     /** Create a Tuple from the contents of a List
      * 
-     * @param values
+     * @param list
      */
-    @SuppressWarnings("unchecked")
-    public Tuple(List<E> values) {
-        int capacity = values.size();
-        elements = (E[]) new Object[capacity];
+    public Tuple(List<Integer> list) {
+        int capacity = list.size();
+        elements = new int[capacity];
         for (int i = 0; i < capacity; ++i) {
-            elements[i] = values.get(i);
+            elements[i] = list.get(i);
+        }
+    }
+
+    /** Create a Tuple from the contents of an array
+     * 
+     * @param arr
+     */
+    public Tuple(int[] arr) {
+        int capacity = arr.length;
+        elements = new int[capacity];
+        for (int i = 0; i < capacity; ++i) {
+            elements[i] = arr[i];
         }
     }
 
@@ -40,23 +50,19 @@ public class Tuple<E> implements Comparable<E> {
      * @param index
      * @return
      */
-    public E get(int index) {
+    public int get(int index) {
         if (index < 0 || index >= elements.length) {
             throw new IndexOutOfBoundsException("Index out of bounds");
         }
         return elements[index];
     }
 
-    public int sum() throws ProjectException {
-        try {
-            int sum = 0;
-            for (int i = 0; i < elements.length; ++i) {
-                sum += (Integer) elements[i]; 
-            }
-            return sum;
-        } catch (Exception e) {
-            throw new ProjectException("Error occurred in Tuple.sum().");
+    public int sum() {
+        int sum = 0;
+        for (int i = 0; i < elements.length; ++i) {
+            sum += elements[i]; 
         }
+        return sum;
     }
 
     /** Return a subtuple starting at index start (inclusive) until index end (exclusive)
@@ -65,13 +71,13 @@ public class Tuple<E> implements Comparable<E> {
      * @param end - exclusive (one less than size)
      * @return
      */
-    public Tuple<E> getSubTuple(int start, int end) throws ProjectException {
+    public Tuple getSubTuple(int start, int end) throws ProjectException {
         if (start >= end) throw new ProjectException("start = " + start + " and end = " + end + " index are invalid.");
-        Tuple<E> newTuple = new Tuple<>(end - start);
-        for (int i = 0; i < newTuple.size(); ++i) {
-            newTuple.elements[i] = this.elements[start+i];
+        Tuple subTuple = new Tuple(end - start);
+        for (int i = 0; i < subTuple.size(); ++i) {
+            subTuple.elements[i] = this.elements[start+i];
         }
-        return newTuple;
+        return subTuple;
     }
     
     /** Return a subtuple starting at index start (inclusive) until the end of the tuple
@@ -80,11 +86,11 @@ public class Tuple<E> implements Comparable<E> {
      * @return
      * @throws ProjectException
      */
-    public Tuple<E> getSubTuple(int start) throws ProjectException {
+    public Tuple getSubTuple(int start) throws ProjectException {
         return getSubTuple(start, this.size());
     }
 
-    public Tuple<Integer> getNextAscendingIntTupleAfter(Tuple<Integer> subTuple, int min, int max) throws ProjectException {
+    public Tuple getNextAscendingTupleAfter(Tuple subTuple, int min, int max) throws ProjectException {
         List<Integer> nextAsList = subTuple.toList();
         // System.out.print("for tuple " + nextAsList + ":"); // DEBUG
         for (int i = nextAsList.size() - 1; i >= 0; --i) {
@@ -92,7 +98,7 @@ public class Tuple<E> implements Comparable<E> {
             if (i == nextAsList.size() - 1) { // last element
                 if (nextAsList.get(i) < max) {
                     nextAsList.set(i, nextAsList.get(i) + 1);
-                    return new Tuple<Integer>(nextAsList);
+                    return new Tuple(nextAsList);
                 } else { // last element == max 
                     continue;
                 }
@@ -103,7 +109,7 @@ public class Tuple<E> implements Comparable<E> {
                     for (int j = i + 1; j < nextAsList.size(); ++j) { 
                         nextAsList.set(j, nextAsList.get(j-1) + 1);
                     }
-                    return new Tuple<Integer>(nextAsList);
+                    return new Tuple(nextAsList);
                 } else {
                     continue;
                 }
@@ -113,16 +119,16 @@ public class Tuple<E> implements Comparable<E> {
         return null;
     }
 
-    public Tuple<Integer> getNextAscendingIntTupleAfter(Tuple<Integer> subTuple) throws ProjectException {
-        return getNextAscendingIntTupleAfter(subTuple, this.getMinInt(), this.getMaxInt());
+    public Tuple getNextAscendingTupleAfter(Tuple subTuple) throws ProjectException {
+        return getNextAscendingTupleAfter(subTuple, this.getMinInt(), this.getMaxInt());
     }
 
-    public Tuple<Integer> getNextIntTupleAfter(Tuple<Integer> subTuple, int min, int max) throws ProjectException {
+    public Tuple getNextTupleAfter(Tuple subTuple, int min, int max) throws ProjectException {
         List<Integer> nextAsList = subTuple.toList();
         for (int i = nextAsList.size() - 1; i >= 0; --i) {
             if (nextAsList.get(i) < max) {
                 nextAsList.set(i, nextAsList.get(i) + 1);
-                return new Tuple<Integer>(nextAsList);
+                return new Tuple(nextAsList);
             } else {
                 nextAsList.set(i, min);
             }
@@ -130,22 +136,22 @@ public class Tuple<E> implements Comparable<E> {
         return null;
     }
 
-    public Tuple<Integer> getNextIntTupleAfter(Tuple<Integer> subTuple) throws ProjectException {
-        return getNextIntTupleAfter(subTuple, this.getMinInt(), this.getMaxInt());
+    public Tuple getNextTupleAfter(Tuple subTuple) throws ProjectException {
+        return getNextTupleAfter(subTuple, this.getMinInt(), this.getMaxInt());
     }
 
     public int getMinInt() {
-        return (int) this.get(minIntIndex());
+        return this.get(minIntIndex());
     }
 
     public int getMaxInt() {
-        return (int) this.get(maxIntIndex());
+        return this.get(maxIntIndex());
     }
 
     public int minIntIndex() {
         int minIndex = 0;
         for (int i = 0; i < this.size(); ++i) {
-            if ((int) this.get(minIndex) > (int) this.get(i)) {
+            if (this.get(minIndex) > this.get(i)) {
                 minIndex = i;
             }
         }
@@ -155,7 +161,7 @@ public class Tuple<E> implements Comparable<E> {
     public int maxIntIndex() {
         int maxIndex = 0;
         for (int i = 0; i < this.size(); ++i) {
-            if ((int) this.get(maxIndex) < (int) this.get(i)) {
+            if (this.get(maxIndex) < this.get(i)) {
                 maxIndex = i;
             }
         }
@@ -164,16 +170,16 @@ public class Tuple<E> implements Comparable<E> {
 
     public int containsInt(int key) {
         for (int i = 0; i < elements.length; ++i) {
-            if ((int) elements[i] == key) {
+            if (elements[i] == key) {
                 return i;
             }
         }
         return -1;
     }
 
-    public int contains(E key) {
+    public int contains(int key) {
         for (int i = 0; i < elements.length; ++i) {
-            if (elements[i].equals(key)) {
+            if (elements[i] == key) {
                 return i;
             }
         }
@@ -203,8 +209,8 @@ public class Tuple<E> implements Comparable<E> {
      * 
      * @return a List with the same content as the tuple
      */
-    public List<E> toList() {
-        List<E> newList = new ArrayList<>();
+    public List<Integer> toList() {
+        List<Integer> newList = new ArrayList<>();
         for (int i = 0; i < elements.length; ++i) {
             newList.add(elements[i]);
         }
@@ -214,29 +220,27 @@ public class Tuple<E> implements Comparable<E> {
     /** Compares a tuple to another object and returns true if both tuples are equal, equal as in for tuples a and b, a_i = b_i for all i
      * 
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true; // they are the same object
         if (obj == null || getClass() != obj.getClass()) return false; // different class
-        Tuple<E> other = (Tuple<E>) obj; // same class, cast obj and compare
+        Tuple other = (Tuple) obj; // same class, cast obj and compare
         for (int i = 0; i < elements.length; ++i) {
-            if (!elements[i].equals(other.elements[i])) {
+            if (elements[i] != (other.elements[i])) {
                 return false;
             }
         }
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public int compareTo(E other) { // other is a Tuple<E>
-        if (Integer.compare(this.size(), ((Tuple<E>)other).size()) != 0) { // if not same size, smaller come first
-            return this.size() - ((Tuple<E>)other).size();
+    public int compareTo(Tuple other) { // other is a Tuple<E>
+        if (Integer.compare(this.size(), ((Tuple)other).size()) != 0) { // if not same size, smaller come first
+            return this.size() - ((Tuple)other).size();
         }
-        for (int i = 0; i < Integer.min(this.size(), ((Tuple<E>)other).size()); ++i) { // else compare every element
-            if (Integer.compare((int)this.get(i), (int)((Tuple<E>)other).get(i)) != 0) {
-                return (int)this.get(i) - (int)((Tuple<E>)other).get(i);
+        for (int i = 0; i < Integer.min(this.size(), ((Tuple)other).size()); ++i) { // else compare every element
+            if (Integer.compare(this.get(i), ((Tuple)other).get(i)) != 0) {
+                return this.get(i) - ((Tuple)other).get(i);
             }
         }
         return 0;

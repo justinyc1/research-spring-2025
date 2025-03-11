@@ -33,27 +33,36 @@ import java.util.ArrayList;
 public class Project {
     public static void main(String[] args) throws ProjectException, FileNotFoundException {
         // validate_set_V(5, 2);
-        // validate_set_V(9, 2);
+        validate_set_V(15, 4);
         // validate_set_V(15, 2);
         
-        validate_set_V(49, 4);
+        // validate_set_V(45, 4);
 
-        // test_all_m_and_d_combinations();
+        // test_all_m_and_d_combinations(61, 999, 4, 4);
     }
 
-    public static void test_all_m_and_d_combinations() throws FileNotFoundException {
+    public static String plural(long num) {
+        return num == 1 ? "" : "s";
+    }
+
+    public static String plural(int num) {
+        return num == 1 ? "" : "s";
+    }
+
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
         System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\r"); // a single enter press is now the separator.
-        for (int i = 5; i < 200; ++i) { 
-            // for (int j = 2; j <= i/2 - 1; ++j) {    
+        for (int i = m_start; i <= m_end; ++i) { 
+            for (int j = d_start; j <= i/2 - 1 && j <= d_end; ++j) {    
                 try {
-                    validate_set_V(i, 4); // m = 21, 2 <= d <= 8 is very interesting
+                    validate_set_V(i, j); // m = 21, 2 <= d <= 8 is very interesting
                 } catch (ProjectException e) {
+                    e.printStackTrace();
                     continue;
                 }
                 sc.next();
-            // } 
+            } 
         }
         sc.close();
     }
@@ -74,6 +83,8 @@ public class Project {
 
         pw.println("Running method validate_set_V(m = " + m + ", d = " + d + "):\n");
 
+        long startTime = System.nanoTime();
+
         //TODO: extract this section into a method
         //===== create and put valid values in 'Z/mZ' and 'Z/mZ*' set =====
         Set<Integer> Z_mod_m_Z = new HashSet<>();
@@ -85,7 +96,6 @@ public class Project {
             }
         }
 
-
         System.out.println("Z/mZ:  " + Z_mod_m_Z.toString()); //DEBUG
         System.out.println("Z/mZ*: " + Z_mod_m_Z_star.toString()); //DEBUG
 
@@ -95,18 +105,18 @@ public class Project {
         // for alpha tuple, range of each term: 1 <= a_i <= m-1
         int alpha_length = n + 2; // a_0, a_1, ... a_n, a_n+1
 
-        Set<Tuple<Integer>> U_set = new HashSet<>(); // contains all alpha tuples that are valid for the U set
+        Set<Tuple> U_set = new HashSet<>(); // contains all alpha tuples that are valid for the U set
         find_all_valid_alpha_combinations(U_set, Z_mod_m_Z, m, alpha_length);
         // by this point the U_set will have all valid alpha tuples
 
 
         // B_m^n := {alpha in U_m^n such that |t * alpha| = n/2 +1 for all t in Z/mZ*}
-        Set<Tuple<Integer>> B_set = new HashSet<>(); // contains all alpha tuples that are valid for the B set
+        Set<Tuple> B_set = new HashSet<>(); // contains all alpha tuples that are valid for the B set
         int n_halved_plus_one = (n / 2) + 1;
         // System.out.println("n/2 + 1 = " + n_halved_plus_one);//DEBUG
 
         // TODO: could use regular for loops for slightly faster time
-        for (Tuple<Integer> alpha : U_set) {
+        for (Tuple alpha : U_set) {
             boolean this_alpha_is_valid = true;
             for (int t : Z_mod_m_Z_star) {
 
@@ -133,9 +143,9 @@ public class Project {
         }
 
         //because all alpha tuples in B set is already in ascending order (due to the find all combination algorithm), all alpha tuples in set B are valid tuples for set V
-        Set<Tuple<Integer>> V_set = new HashSet<>(); // contains all tuples from the B set that are valid for the V set
+        Set<Tuple> V_set = new HashSet<>(); // contains all tuples from the B set that are valid for the V set
         // TODO: use normal for loop for faster speed
-        for (Tuple<Integer> tuple : B_set) {
+        for (Tuple tuple : B_set) {
             // if the tuple is in ascending order, in the range [1, m-1], it is valid tuple for V set
             V_set.add(tuple); // every tuple in B set is already in ascending order
         }
@@ -150,17 +160,17 @@ public class Project {
          */
         
         
-        Set<Tuple<Integer>> all_are_pairs = new HashSet<>();  // contains all tuples from the V set that have  ONLY PAIRS  adding up to m
-        Set<Tuple<Integer>> some_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  SOME PAIRS  adding up to m (but not all pairs)
-        Set<Tuple<Integer>> none_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  NO PAIRS    adding up to m
-        Set<Tuple<Integer>> indecomposable = new HashSet<>(); // contains all tuples from the V set that have  NO SUBSETS  adding up to m
-        Set<Tuple<Integer>> decomposable_but_no_pairs = new HashSet<>(); // contains all tuples from the V set that HAVE SUBSETS & NO PAIRS  adding up to m
-        Set<Tuple<Integer>> exceptional_cycles = new HashSet<>(); // contains all tuples from the V set that are not made up of exclusively pairs
+        Set<Tuple> all_are_pairs = new HashSet<>();  // contains all tuples from the V set that have  ONLY PAIRS  adding up to m
+        Set<Tuple> some_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  SOME PAIRS  adding up to m (but not all pairs)
+        Set<Tuple> none_are_pairs = new HashSet<>(); // contains all tuples from the V set that have  NO PAIRS    adding up to m
+        Set<Tuple> indecomposable = new HashSet<>(); // contains all tuples from the V set that have  NO SUBSETS  adding up to m
+        Set<Tuple> decomposable_but_no_pairs = new HashSet<>(); // contains all tuples from the V set that HAVE SUBSETS & NO PAIRS  adding up to m
+        Set<Tuple> exceptional_cycles = new HashSet<>(); // contains all tuples from the V set that are not made up of exclusively pairs
         // TODO: check code for indecomposable; check indecomposable definitions
         // populate_indecomposable(V_set, indecomposable, m); // TODO: BUG: THIS MAY HAVE CAUSED WRONG indecomposable set VALUES
         
         // TODO: should be a way to make this faster? (actually prob not)
-        for (Tuple<Integer> tuple : V_set) { // for each tuple
+        for (Tuple tuple : V_set) { // for each tuple
             // System.out.println("for tuple " + tuple); //DEBUG
 
             // some boolean variables to keep track of each tuple's traits
@@ -209,9 +219,9 @@ public class Project {
         int max_subset_size = 2 * d - 2;
 
         if (d >= 3) { // when d = 2 or less, alpha have at most 4 elements, so there is no indecomposables nor decomposable but no pairs 
-            for (Tuple<Integer> alpha : none_are_pairs) { // each element is an alpha with no pairs
+            for (Tuple alpha : none_are_pairs) { // each element is an alpha with no pairs
                 boolean divides_m = false;
-                Tuple<Integer> subtuple = Tuple.EMPTY_INTEGER_TUPLE;
+                Tuple subtuple = Tuple.EMPTY_TUPLE;
                 for (int size = min_subset_size; size <= max_subset_size; size+=2) { // for each possible subtuple length:
                     // go though each possible subtuple combination from alpha to find a subtuple that adds to multiple of m
 
@@ -231,7 +241,7 @@ public class Project {
                             divides_m = true;
                             break;
                         }
-                        subtuple = alpha.getNextAscendingIntTupleAfter(subtuple);
+                        subtuple = alpha.getNextAscendingTupleAfter(subtuple);
                     }
 
                     if (divides_m) break;
@@ -253,34 +263,36 @@ public class Project {
             }
         }
 
-/* BACKUP FOR CODE FOR EXCEPTIONAL CYCLES
-        // TODO: should be a way to make this faster? (actually prob not)
-        for (Tuple<Integer> tuple : V_set) { // for each tuple
-            // System.out.println("for tuple " + tuple); //DEBUG
-
-            for (int i = 0; i < tuple.size(); ++i) { // for an element at i of tuple
-                boolean ith_element_has_pair = false;
-
-                // for any element at i, j loop makes sure to set ith_element_has_pair to true if found a pair, or ith_element_has_pair remains false, which means the tuple is an exceptional cycle
-                for (int j = 0; j < tuple.size(); ++j) { // check every element (as j)
-                    // System.out.print("  at i: " + tuple.get(i) + "  at j: " + tuple.get(j) + "  and m = " + m); //DEBUG
-                    if ((tuple.get(i) + tuple.get(j)) % m == 0) {
-                        // System.out.println("   PAIR FOUND"); //DEBUG
-                        ith_element_has_pair = true;
-                        break;
-                    }
-                    // System.out.println();
-                }
-
-                if (!ith_element_has_pair) {
-                    exceptional_cycles.add(tuple);
-                    break;
-                }
-
-            }
-
-        }
-*/
+        long endTime = System.nanoTime();
+        long elapsedTime = endTime - startTime; // in nano seconds (10^-9)
+        
+        // derive from nanoseconds elapsed from the start of the calculation operations of the program 
+        // long tempSec  = elapsedTime / (1000*1000*1000);
+        long allNanoSec  = elapsedTime;
+        long allMicroSec =  elapsedTime / 1000;
+        long allMiliSec  =  elapsedTime / (1000*1000);
+        long allSec      = (elapsedTime / (1000*1000)) / 1000;
+        long allMin      = (elapsedTime / (1000*1000)) / (1000*60);
+        long allHour     = (elapsedTime / (1000*1000)) / (1000*60*60);
+        long allDay      = (elapsedTime / (1000*1000)) / (1000*60*60*24);
+        
+        long nanoSec     =   allNanoSec % 1000; // in  nano seconds (10^-9)
+        long microSec    =  allMicroSec % 1000; // in micro seconds (10^-6)
+        long miliSec     =   allMiliSec % 1000; // in  mili seconds (10^-3)
+        long sec         =       allSec % 60;
+        long min         =       allMin % 60;
+        long hour        =      allHour % 24;
+        // System.out.println(nanoSec);
+        // System.out.println(microSec);
+        // System.out.println(miliSec);
+        // System.out.println(sec + " seconds");
+        // System.out.println(min);
+        // System.out.println(hour);
+        // System.out.println(allDay);
+        String formattedElapsedTime = String.format(
+            "%d day%s, %d hour%s, %d minute%s, %d second%s, %d milisecond%s, %d microsecond%s, %d nanosecond%s", 
+            allDay, plural(allDay), hour, plural(hour), min, plural(min), sec, plural(sec), 
+            miliSec, plural(miliSec), microSec, plural(microSec), nanoSec, plural(nanoSec));
 
         // System.out.println();
         // System.out.println("Print \"reduced\" " + redString("U") + " set (contains " + redString(U_set.size()) + " tuples): " + U_set); //DEBUG
@@ -315,6 +327,7 @@ public class Project {
         // extra summary section, for when sets gets too large (using space for spacing/aligning instead of printf)
         System.out.println("Summary:");
         System.out.println("given " + redString("m = ", m) + ", " + redString("d = ", d));
+        System.out.println("Calculations took " + formattedElapsedTime + ".");
         System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size ", 2*d) + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
         System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size 1 to ", 2*d) + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
         System.out.println("            " +"\"reduced\" " + redString("U") + " set: contains " + redString(U_set.size()) + " tuples");
@@ -329,6 +342,7 @@ public class Project {
 
         pw.println("Summary:");
         pw.println("given m = " + m + ", d = " + d);
+        pw.println("Calculations took " + formattedElapsedTime + ".");
         pw.println("Z/mZ:  " + Z_mod_m_Z.toString());
         pw.println("Z/mZ*: " + Z_mod_m_Z_star.toString());
         pw.println("All ascending & non-repeating tuple (size " + 2*d + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
@@ -404,7 +418,7 @@ public class Project {
      * @param m
      * @param alpha_length - length of each alpha tuple, determined by n
      */
-    public static void find_all_valid_alpha_combinations(Set<Tuple<Integer>> U_set, Set<Integer> Z_mod_m_Z, int m, int alpha_length) {
+    public static void find_all_valid_alpha_combinations(Set<Tuple> U_set, Set<Integer> Z_mod_m_Z, int m, int alpha_length) {
         Object[] ZmmZ_array = Z_mod_m_Z.toArray();
         recursively_find_all(U_set, ZmmZ_array, m, alpha_length, new ArrayList<>(), 0, 1, 1);
     }
@@ -420,7 +434,7 @@ public class Project {
      * @param begin - the index of the smallest value that this current position can be
      * @param depth - the current level of the recursion method
      */
-    private static void recursively_find_all(Set<Tuple<Integer>> U_set, Object[] ZmmZ_array, int m, int alpha_length, List<Integer> this_combination, int sum, int begin, int depth) {
+    private static void recursively_find_all(Set<Tuple> U_set, Object[] ZmmZ_array, int m, int alpha_length, List<Integer> this_combination, int sum, int begin, int depth) {
         if (depth > alpha_length) return;
 
         for (int i = begin; i < ZmmZ_array.length - alpha_length + depth; ++i) {
@@ -428,7 +442,7 @@ public class Project {
             sum += (int)ZmmZ_array[i];
 
             // if (this_combination.size() == alpha_length) System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
-            if (this_combination.size() == alpha_length && sum % m == 0) U_set.add(new Tuple<Integer>(this_combination));
+            if (this_combination.size() == alpha_length && sum % m == 0) U_set.add(new Tuple(this_combination));
             
             recursively_find_all(U_set, ZmmZ_array, m, alpha_length, this_combination, sum, i+1, depth+1);
             
@@ -437,8 +451,8 @@ public class Project {
         }
     }
 
-    public static void populate_indecomposable(Set<Tuple<Integer>> V_set, Set<Tuple<Integer>> indecomposable, int m) {
-        for (Tuple<Integer> tuple : V_set) {
+    public static void populate_indecomposable(Set<Tuple> V_set, Set<Tuple> indecomposable, int m) {
+        for (Tuple tuple : V_set) {
             boolean has_subset = is_indecomposable_recursively(indecomposable, m, tuple, new ArrayList<Integer>(), 0, 0, 1);
             if (!has_subset) {
                 indecomposable.add(tuple);
@@ -446,7 +460,7 @@ public class Project {
         }
     }
 
-    private static boolean is_indecomposable_recursively(Set<Tuple<Integer>> indecomposable, int m, Tuple<Integer> tuple, List<Integer> this_combination, int sum, int begin, int depth) {
+    private static boolean is_indecomposable_recursively(Set<Tuple> indecomposable, int m, Tuple tuple, List<Integer> this_combination, int sum, int begin, int depth) {
         // only return true if subset found, else return false
         if (depth >= tuple.size()) return false;
 
@@ -479,21 +493,21 @@ public class Project {
         return "\u001b[31m" + str + num + "\u001b[0m";
     }
 
-    public static String toStringSorted(Set<Tuple<Integer>> set) {
-        return toString(new TreeSet<Tuple<Integer>>(set), ", ");
+    public static String toStringSorted(Set<Tuple> set) {
+        return toString(new TreeSet<Tuple>(set), ", ");
     }
 
-    public static String toStringSorted(Set<Tuple<Integer>> set, String delimiter) {
-        return toString(new TreeSet<Tuple<Integer>>(set), delimiter);
+    public static String toStringSorted(Set<Tuple> set, String delimiter) {
+        return toString(new TreeSet<Tuple>(set), delimiter);
     }
 
-    public static String toString(Set<Tuple<Integer>> set) {
+    public static String toString(Set<Tuple> set) {
             return toString(set, ", ");
     }
 
-    public static String toString(Set<Tuple<Integer>> set, String delimiter) {
+    public static String toString(Set<Tuple> set, String delimiter) {
         StringBuilder sb = new StringBuilder("{");
-        Iterator<Tuple<Integer>> iter = set.iterator();
+        Iterator<Tuple> iter = set.iterator();
         if (iter.hasNext()) {
             sb.append(delimiter).append(iter.next().toString()); // element first
         }
