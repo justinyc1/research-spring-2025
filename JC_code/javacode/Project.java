@@ -33,30 +33,27 @@ import java.util.ArrayList;
 public class Project {
     public static void main(String[] args) throws ProjectException, FileNotFoundException {
         // validate_set_V(5, 2);
-        validate_set_V(15, 4);
+        // validate_set_V(9, 2);
         // validate_set_V(15, 2);
         
+        // validate_set_V(15, 4);
         // validate_set_V(45, 4);
 
-        // test_all_m_and_d_combinations(61, 999, 4, 4);
-    }
-
-    public static String plural(long num) {
-        return num == 1 ? "" : "s";
-    }
-
-    public static String plural(int num) {
-        return num == 1 ? "" : "s";
+        test_all_m_and_d_combinations(61, 999, 4, 4);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws FileNotFoundException {
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, false);
+    }
+
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs) throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
         System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\r"); // a single enter press is now the separator.
         for (int i = m_start; i <= m_end; ++i) { 
             for (int j = d_start; j <= i/2 - 1 && j <= d_end; ++j) {    
                 try {
-                    validate_set_V(i, j); // m = 21, 2 <= d <= 8 is very interesting
+                    validate_set_V(i, j, print_outputs); // m = 21, 2 <= d <= 8 is very interesting
                 } catch (ProjectException e) {
                     e.printStackTrace();
                     continue;
@@ -67,21 +64,28 @@ public class Project {
         sc.close();
     }
 
+    public static void validate_set_V(int m, int d) throws ProjectException, FileNotFoundException {
+        validate_set_V(m, d, false);
+    }
+
     /**
      * TODO: possibly rename the method to a more meaningful name
      * @param m - An positve odd integer
      * @param d - An positive integer in the range: 1 <= d <= (m-1)/2
      */
-    public static void validate_set_V(int m, int d) throws ProjectException, FileNotFoundException {
+    public static void validate_set_V(int m, int d, boolean print_outputs) throws ProjectException, FileNotFoundException {
         System.out.println("Running method validate_set_V(" + redString("m = ", m) + ", " + redString("d = ", d) + "):\n");
         
         validate_m_and_d(m, d);
 
         String filepath = "JC_code\\outputs\\";
         String filename = "output_for_m_" + m + "_d_" + d + ".txt";
-        PrintWriter pw = new PrintWriter(filepath + filename);
+        PrintWriter pw = new PrintWriter(filepath + "test.txt");
+        if (print_outputs) {
+            pw = new PrintWriter(filepath + filename);
+        }
 
-        pw.println("Running method validate_set_V(m = " + m + ", d = " + d + "):\n");
+        if (print_outputs) pw.println("Running method validate_set_V(m = " + m + ", d = " + d + "):\n");
 
         long startTime = System.nanoTime();
 
@@ -96,8 +100,8 @@ public class Project {
             }
         }
 
-        System.out.println("Z/mZ:  " + Z_mod_m_Z.toString()); //DEBUG
-        System.out.println("Z/mZ*: " + Z_mod_m_Z_star.toString()); //DEBUG
+        // System.out.println("Z/mZ:  " + Z_mod_m_Z.toString()); //DEBUG
+        // System.out.println("Z/mZ*: " + Z_mod_m_Z_star.toString()); //DEBUG
 
         // deal with B_m^n and U_m^n where n:
         int n = (2 * d) - 2;
@@ -106,7 +110,7 @@ public class Project {
         int alpha_length = n + 2; // a_0, a_1, ... a_n, a_n+1
 
         Set<Tuple> U_set = new HashSet<>(); // contains all alpha tuples that are valid for the U set
-        find_all_valid_alpha_combinations(U_set, Z_mod_m_Z, m, alpha_length);
+        find_all_valid_alpha_combinations(U_set, m, alpha_length);
         // by this point the U_set will have all valid alpha tuples
 
 
@@ -249,13 +253,13 @@ public class Project {
             // back to for each alpha
                 if (divides_m) {
                     System.out.println("adding to decomposable but no pairs set: " + alpha);
-                    // pw.println("adding to decomposable but no pairs set: " + alpha);
+                    // if (print_outputs) pw.println("adding to decomposable but no pairs set: " + alpha);
                     no_pair_print_buffer.append("adding to decomposable but no pairs set: " + alpha + ", since subtuple = " + subtuple + "\n");
                     decomposable_but_no_pairs.add(alpha);
                     continue;
                 } else {
                     System.out.println("adding to indecomposable set: " + alpha);
-                    // pw.println("adding to indecomposable set: " + alpha);
+                    // if (print_outputs) pw.println("adding to indecomposable set: " + alpha);
                     no_pair_print_buffer.append("adding to indecomposable set: " + alpha + "\n");
                     indecomposable.add(alpha);
                     continue;
@@ -312,11 +316,11 @@ public class Project {
         // System.out.println();
         // System.out.println("Print " + redString("none") + "_are_pairs" + " (contains " + redString(none_are_pairs.size()) + " tuples): " + none_are_pairs); //DEBUG
         
-        System.out.println();
-        System.out.println("Print " + redString("indecomposable") + " (contains " + redString(indecomposable.size()) + " tuples): " + indecomposable); //DEBUG
+        // System.out.println();
+        // System.out.println("Print " + redString("indecomposable") + " (contains " + redString(indecomposable.size()) + " tuples): " + indecomposable); //DEBUG
         
-        System.out.println();
-        System.out.println("Print " + redString("decomposable but no pairs") + " (contains " + redString(decomposable_but_no_pairs.size()) + " tuples): " + decomposable_but_no_pairs); //DEBUG
+        // System.out.println();
+        // System.out.println("Print " + redString("decomposable but no pairs") + " (contains " + redString(decomposable_but_no_pairs.size()) + " tuples): " + decomposable_but_no_pairs); //DEBUG
         
         // System.out.println();
         // System.out.println("Print " + redString("exceptional") + " cycles (contains " + redString(exceptional_cycles.size()) + " tuples): " + exceptional_cycles); //DEBUG
@@ -340,57 +344,57 @@ public class Project {
         System.out.println(redString("decomposable & no pairs") + " set: contains " + redString(decomposable_but_no_pairs.size()) + " tuples");
         System.out.println("     " + redString("exceptional") + "_cycles" + " set: contains " + redString(exceptional_cycles.size()) + " tuples");
 
-        pw.println("Summary:");
-        pw.println("given m = " + m + ", d = " + d);
-        pw.println("Calculations took " + formattedElapsedTime + ".");
-        pw.println("Z/mZ:  " + Z_mod_m_Z.toString());
-        pw.println("Z/mZ*: " + Z_mod_m_Z_star.toString());
-        pw.println("All ascending & non-repeating tuple (size " + 2*d + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
-        pw.println("All ascending & non-repeating tuple (size 1 to " + 2*d + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
-        pw.println("            " +"\"reduced\" U set: contains " + U_set.size() + " tuples");
-        pw.println("            \"reduced\" B set: contains " + B_set.size() + " tuples");
-        pw.println("                      V set: contains " + V_set.size() + " tuples");
-        pw.println("          all_are_pairs set: contains " + all_are_pairs.size() + " tuples");
-        pw.println("         some_are_pairs set: contains " + some_are_pairs.size() + " tuples");
-        pw.println("         none_are_pairs set: contains " + none_are_pairs.size() + " tuples");
-        pw.println("         indecomposable set: contains " + indecomposable.size() + " tuples");
-        pw.println("decomposable & no pairs set: contains " + decomposable_but_no_pairs.size() + " tuples");
-        pw.println("     exceptional_cycles set: contains " + exceptional_cycles.size() + " tuples");
+        if (print_outputs) pw.println("Summary:");
+        if (print_outputs) pw.println("given m = " + m + ", d = " + d);
+        if (print_outputs) pw.println("Calculations took " + formattedElapsedTime + ".");
+        if (print_outputs) pw.println("Z/mZ:  " + Z_mod_m_Z.toString());
+        if (print_outputs) pw.println("Z/mZ*: " + Z_mod_m_Z_star.toString());
+        if (print_outputs) pw.println("All ascending & non-repeating tuple (size " + 2*d + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
+        if (print_outputs) pw.println("All ascending & non-repeating tuple (size 1 to " + 2*d + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
+        if (print_outputs) pw.println("            " +"\"reduced\" U set: contains " + U_set.size() + " tuples");
+        if (print_outputs) pw.println("            \"reduced\" B set: contains " + B_set.size() + " tuples");
+        if (print_outputs) pw.println("                      V set: contains " + V_set.size() + " tuples");
+        if (print_outputs) pw.println("          all_are_pairs set: contains " + all_are_pairs.size() + " tuples");
+        if (print_outputs) pw.println("         some_are_pairs set: contains " + some_are_pairs.size() + " tuples");
+        if (print_outputs) pw.println("         none_are_pairs set: contains " + none_are_pairs.size() + " tuples");
+        if (print_outputs) pw.println("         indecomposable set: contains " + indecomposable.size() + " tuples");
+        if (print_outputs) pw.println("decomposable & no pairs set: contains " + decomposable_but_no_pairs.size() + " tuples");
+        if (print_outputs) pw.println("     exceptional_cycles set: contains " + exceptional_cycles.size() + " tuples");
 
-        // pw.println();
-        // pw.println("Print \"reduced\" U set (contains " + U_set.size() + " tuples): " + toStringSorted(U_set, "\n")); //DEBUG
+        // if (print_outputs) pw.println();
+        // if (print_outputs) pw.println("Print \"reduced\" U set (contains " + U_set.size() + " tuples): " + toStringSorted(U_set, "\n")); //DEBUG
 
-        // pw.println();
-        // pw.println("Print \"reduced\" B set (contains " + B_set.size() + " tuples): " + toString(B_set, "\n")); //DEBUG
+        // if (print_outputs) pw.println();
+        // if (print_outputs) pw.println("Print \"reduced\" B set (contains " + B_set.size() + " tuples): " + toString(B_set, "\n")); //DEBUG
 
-        pw.println();
-        pw.println("Print V set (contains " + V_set.size() + " tuples): " + toString(V_set, "\n")); //DEBUG
+        if (print_outputs) pw.println();
+        if (print_outputs) pw.println("Print V set (contains " + V_set.size() + " tuples): " + toString(V_set, "\n")); //DEBUG
 
-        pw.println();
-        pw.println("Print all_are_pairs (contains " + all_are_pairs.size() + " tuples): " + toString(all_are_pairs, "\n")); //DEBUG
+        if (print_outputs) pw.println();
+        if (print_outputs) pw.println("Print all_are_pairs (contains " + all_are_pairs.size() + " tuples): " + toString(all_are_pairs, "\n")); //DEBUG
 
-        pw.println();
-        pw.println("Print some_are_pairs (contains " + some_are_pairs.size() + " tuples): " + toString(some_are_pairs, "\n")); //DEBUG
+        if (print_outputs) pw.println();
+        if (print_outputs) pw.println("Print some_are_pairs (contains " + some_are_pairs.size() + " tuples): " + toString(some_are_pairs, "\n")); //DEBUG
 
-        pw.println();
-        pw.println("Print none_are_pairs (contains " + none_are_pairs.size() + " tuples): " + toString(none_are_pairs, "\n")); //DEBUG
+        if (print_outputs) pw.println();
+        if (print_outputs) pw.println("Print none_are_pairs (contains " + none_are_pairs.size() + " tuples): " + toString(none_are_pairs, "\n")); //DEBUG
 
-        pw.println();
-        pw.println("Print indecomposable (contains " + indecomposable.size() + " tuples): " + toString(indecomposable, "\n")); //DEBUG
+        if (print_outputs) pw.println();
+        if (print_outputs) pw.println("Print indecomposable (contains " + indecomposable.size() + " tuples): " + toString(indecomposable, "\n")); //DEBUG
 
-        pw.println();
-        pw.println("Print decomposable but no pairs (contains " + decomposable_but_no_pairs.size() + " tuples): " + toString(decomposable_but_no_pairs, "\n")); //DEBUG
+        if (print_outputs) pw.println();
+        if (print_outputs) pw.println("Print decomposable but no pairs (contains " + decomposable_but_no_pairs.size() + " tuples): " + toString(decomposable_but_no_pairs, "\n")); //DEBUG
 
-        pw.println();
-        pw.println("Print exceptional cycles (contains " + exceptional_cycles.size() + " tuples): " + toString(exceptional_cycles, "\n")); //DEBUG
+        if (print_outputs) pw.println();
+        if (print_outputs) pw.println("Print exceptional cycles (contains " + exceptional_cycles.size() + " tuples): " + toString(exceptional_cycles, "\n")); //DEBUG
 
-        pw.println();
+        if (print_outputs) pw.println();
 
-        pw.println("Below are debug outputs for each alpha in V whether it was put in the indecomposable set or the decomposable but no pairs set:");
-        pw.println(no_pair_print_buffer.toString());
+        if (print_outputs) pw.println("Below are debug outputs for each alpha in V whether it was put in the indecomposable set or the decomposable but no pairs set:");
+        if (print_outputs) pw.println(no_pair_print_buffer.toString());
 
         System.out.println("\nmethod validate_set_V(" + redString(m) + ", " + redString(d) + ") ran to completion.");
-        pw.println("\nmethod validate_set_V(" + m + ", " + d + ") ran to completion.");
+        if (print_outputs) pw.println("\nmethod validate_set_V(" + m + ", " + d + ") ran to completion.");
 
         pw.close();
         return;
@@ -414,13 +418,12 @@ public class Project {
     /** Calls the recursive algorithm to find all valid ascending combinations of alpha tuple
      * 
      * @param U_set - the set that contains all valid alpha tuples
-     * @param Z_mod_m_Z
-     * @param m
+     * @param m - the upper limit (exclusive) of Z/mZ when finding combinations
      * @param alpha_length - length of each alpha tuple, determined by n
      */
-    public static void find_all_valid_alpha_combinations(Set<Tuple> U_set, Set<Integer> Z_mod_m_Z, int m, int alpha_length) {
-        Object[] ZmmZ_array = Z_mod_m_Z.toArray();
-        recursively_find_all(U_set, ZmmZ_array, m, alpha_length, new ArrayList<>(), 0, 1, 1);
+    public static void find_all_valid_alpha_combinations(Set<Tuple> U_set, int m, int alpha_length) throws ProjectException {
+        int[] this_combination = new int[alpha_length];
+        recursively_find_all(U_set, m, this_combination, 0, 1);
     }
 
     /** Recursively find all valid ascending combinations of alpha tuple, using the values of Z/mZ (excluding 0)
@@ -434,20 +437,32 @@ public class Project {
      * @param begin - the index of the smallest value that this current position can be
      * @param depth - the current level of the recursion method
      */
-    private static void recursively_find_all(Set<Tuple> U_set, Object[] ZmmZ_array, int m, int alpha_length, List<Integer> this_combination, int sum, int begin, int depth) {
-        if (depth > alpha_length) return;
+    private static void recursively_find_all(Set<Tuple> U_set, int m, int[] this_combination, int sum, int depth) throws ProjectException {
+        // System.out.println(); // DEBUG
+        if (depth > this_combination.length) {
+            // System.out.println("depth = " + depth + "   returning"); // DEBUG
+            return;
+        }
+        
+        int prev = 0;
+        if (depth > 1) prev = this_combination[depth-2];
+        // System.out.println("for comb " + toString(this_combination) + " the prev is " + prev); // DEBUG
+        for (int i = Integer.max(depth, prev + 1); i <= m - 1 - this_combination.length + depth; ++i) {
+            this_combination[depth-1] = i;
+            sum += i;
 
-        for (int i = begin; i < ZmmZ_array.length - alpha_length + depth; ++i) {
-            this_combination.add((int)ZmmZ_array[i]);
-            sum += (int)ZmmZ_array[i];
+            // System.out.println(toString(this_combination, depth) + "   depth = " + depth + "   sum: " + sum); // DEBUG
 
             // if (this_combination.size() == alpha_length) System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
-            if (this_combination.size() == alpha_length && sum % m == 0) U_set.add(new Tuple(this_combination));
+            if (depth == this_combination.length && sum % m == 0) U_set.add(new Tuple(this_combination));
             
-            recursively_find_all(U_set, ZmmZ_array, m, alpha_length, this_combination, sum, i+1, depth+1);
+            recursively_find_all(U_set, m, this_combination, sum, depth+1);
             
-            this_combination.remove((Integer)ZmmZ_array[i]);
-            sum -= (int)ZmmZ_array[i];
+            // System.out.print("subtracting from sum = " + sum + " by last element at index " + depth + "-1 = " + this_combination[depth-1]); // DEBUG
+            // sum -= this_combination[depth-1];
+            sum -= i;
+            // System.out.println("   sum is now = " + sum); // DEBUG
+            // this_combination[depth-1] = 0; // dont need to be removed, but could get garbage values based on implementation
         }
     }
 
@@ -518,6 +533,29 @@ public class Project {
         return sb.toString();
     }
 
+    public static String toString(int[] arr) throws ProjectException {
+        return toString(arr, arr.length);
+    }
+
+    /**
+     * 
+     * @param arr
+     * @param cut_off exclusive
+     * @return
+     * @throws ProjectException
+     */
+    public static String toString(int[] arr, int cut_off) throws ProjectException {
+        if (cut_off < 0 || cut_off > arr.length) {
+            throw new ProjectException("cut off = " + cut_off + " is invalid");
+        }
+
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < cut_off-1; ++i) {
+            sb.append(arr[i]).append(", ");
+        }
+        return sb.append(arr[cut_off-1]).append("]").toString();
+    }
+
     public static String find_num_of_ascending_nonrepeating_tuples_in_U_set(Set<Integer> Z_mod_m_Z, int d) {
         BigInteger result = nCr(BigInteger.valueOf(Z_mod_m_Z.size()-1), BigInteger.valueOf(2*d));
         String str = result.toString();
@@ -530,6 +568,14 @@ public class Project {
             sum += list.get(i);
         }
         return sum;
+    }
+
+    public static String plural(long num) {
+        return num == 1 ? "" : "s";
+    }
+
+    public static String plural(int num) {
+        return num == 1 ? "" : "s";
     }
 
     /** Return the gcd of a and b using the euclidean algorithm
