@@ -39,7 +39,7 @@ public class Project {
         // validate_set_V(15, 4);
         // validate_set_V(45, 4);
 
-        test_all_m_and_d_combinations(61, 999, 4, 4);
+        test_all_m_and_d_combinations(67, 999, 4, 4, true);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws FileNotFoundException {
@@ -115,7 +115,9 @@ public class Project {
 
 
         // B_m^n := {alpha in U_m^n such that |t * alpha| = n/2 +1 for all t in Z/mZ*}
-        Set<Tuple> B_set = new HashSet<>(); // contains all alpha tuples that are valid for the B set
+        // Set<Tuple> B_set = new HashSet<>(); // contains all alpha tuples that are valid for the B set
+        //because all alpha tuples in B set is already in ascending order (due to the find all combination algorithm), all alpha tuples in set B are valid tuples for set V
+        Set<Tuple> V_set = new HashSet<>(); // contains all tuples from the B set that are valid for the V set
         int n_halved_plus_one = (n / 2) + 1;
         // System.out.println("n/2 + 1 = " + n_halved_plus_one);//DEBUG
 
@@ -142,17 +144,15 @@ public class Project {
                 }
             }
             if (this_alpha_is_valid) {
-                B_set.add(alpha);
+                // B_set.add(alpha);
+                V_set.add(alpha);
             }
         }
 
-        //because all alpha tuples in B set is already in ascending order (due to the find all combination algorithm), all alpha tuples in set B are valid tuples for set V
-        Set<Tuple> V_set = new HashSet<>(); // contains all tuples from the B set that are valid for the V set
-        // TODO: use normal for loop for faster speed
-        for (Tuple tuple : B_set) {
-            // if the tuple is in ascending order, in the range [1, m-1], it is valid tuple for V set
-            V_set.add(tuple); // every tuple in B set is already in ascending order
-        }
+        // for (Tuple tuple : B_set) {
+        //     // if the tuple is in ascending order, in the range [1, m-1], it is valid tuple for V set
+        //     V_set.add(tuple); // every tuple in B set is already in ascending order
+        // }
 
         //TODO: can we find pairs by indices? i.e. a_i and a_(n-i) are pairs or there are no pairs
         /* Exceptional Cycles:
@@ -335,7 +335,7 @@ public class Project {
         System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size ", 2*d) + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
         System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size 1 to ", 2*d) + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
         System.out.println("            " +"\"reduced\" " + redString("U") + " set: contains " + redString(U_set.size()) + " tuples");
-        System.out.println("            " + "\"reduced\" " + redString("B") + " set: contains " + redString(B_set.size()) + " tuples");
+        // System.out.println("            " + "\"reduced\" " + redString("B") + " set: contains " + redString(B_set.size()) + " tuples");
         System.out.println("                      " + redString("V") + " set: contains " + redString(V_set.size()) + " tuples");
         System.out.println("          " + redString("all") + "_are_pairs" + " set: contains " + redString(all_are_pairs.size()) + " tuples");
         System.out.println("         " + redString("some") + "_are_pairs" + " set: contains " + redString(some_are_pairs.size()) + " tuples");
@@ -352,7 +352,7 @@ public class Project {
         if (print_outputs) pw.println("All ascending & non-repeating tuple (size " + 2*d + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
         if (print_outputs) pw.println("All ascending & non-repeating tuple (size 1 to " + 2*d + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
         if (print_outputs) pw.println("            " +"\"reduced\" U set: contains " + U_set.size() + " tuples");
-        if (print_outputs) pw.println("            \"reduced\" B set: contains " + B_set.size() + " tuples");
+        // if (print_outputs) pw.println("            \"reduced\" B set: contains " + B_set.size() + " tuples");
         if (print_outputs) pw.println("                      V set: contains " + V_set.size() + " tuples");
         if (print_outputs) pw.println("          all_are_pairs set: contains " + all_are_pairs.size() + " tuples");
         if (print_outputs) pw.println("         some_are_pairs set: contains " + some_are_pairs.size() + " tuples");
