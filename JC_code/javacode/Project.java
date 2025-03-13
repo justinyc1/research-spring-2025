@@ -36,10 +36,10 @@ public class Project {
         // validate_set_V(9, 2);
         // validate_set_V(15, 2);
         
-        // validate_set_V(15, 4);
-        // validate_set_V(45, 4);
+        // validate_set_V(27, 4, true);
+        validate_set_V(77, 4, true);
 
-        test_all_m_and_d_combinations(67, 999, 4, 4, true);
+        // test_all_m_and_d_combinations(73, 999, 4, 4, true);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws FileNotFoundException {
@@ -241,7 +241,7 @@ public class Project {
                     // check every subset combinations if they divides m
                     while (subtuple != null) {
                         if (subtuple.sum() % m == 0) {
-                            System.out.println("for " + alpha + ", the subtuple " + subtuple + " divides m = " + m); // DEBUG
+                            // System.out.println("for " + alpha + ", the subtuple " + subtuple + " divides m = " + m); // DEBUG
                             divides_m = true;
                             break;
                         }
@@ -252,13 +252,13 @@ public class Project {
                 }
             // back to for each alpha
                 if (divides_m) {
-                    System.out.println("adding to decomposable but no pairs set: " + alpha);
+                    // System.out.println("adding to decomposable but no pairs set: " + alpha);
                     // if (print_outputs) pw.println("adding to decomposable but no pairs set: " + alpha);
                     no_pair_print_buffer.append("adding to decomposable but no pairs set: " + alpha + ", since subtuple = " + subtuple + "\n");
                     decomposable_but_no_pairs.add(alpha);
                     continue;
                 } else {
-                    System.out.println("adding to indecomposable set: " + alpha);
+                    // System.out.println("adding to indecomposable set: " + alpha);
                     // if (print_outputs) pw.println("adding to indecomposable set: " + alpha);
                     no_pair_print_buffer.append("adding to indecomposable set: " + alpha + "\n");
                     indecomposable.add(alpha);
