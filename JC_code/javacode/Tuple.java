@@ -71,13 +71,13 @@ public class Tuple implements Comparable<Tuple> {
      * @param end - exclusive (one less than size)
      * @return
      */
-    public Tuple getSubTuple(int start, int end) throws ProjectException {
+    public Tuple getSubtuple(int start, int end) throws ProjectException {
         if (start >= end) throw new ProjectException("start = " + start + " and end = " + end + " index are invalid.");
-        Tuple subTuple = new Tuple(end - start);
-        for (int i = 0; i < subTuple.size(); ++i) {
-            subTuple.elements[i] = this.elements[start+i];
+        Tuple subtuple = new Tuple(end - start);
+        for (int i = 0; i < subtuple.size(); ++i) {
+            subtuple.elements[i] = this.elements[start+i];
         }
-        return subTuple;
+        return subtuple;
     }
     
     /** Return a subtuple starting at index start (inclusive) until the end of the tuple
@@ -86,101 +86,54 @@ public class Tuple implements Comparable<Tuple> {
      * @return
      * @throws ProjectException
      */
-    public Tuple getSubTuple(int start) throws ProjectException {
-        return getSubTuple(start, this.size());
+    public Tuple getSubtuple(int start) throws ProjectException {
+        return getSubtuple(start, this.size());
     }
 
-    public Tuple getNextAscendingTupleAfter(Tuple subTuple, int min, int max) throws ProjectException {
-        List<Integer> nextAsList = subTuple.toList();
-        // System.out.print("for tuple " + nextAsList + ":"); // DEBUG
-        for (int i = nextAsList.size() - 1; i >= 0; --i) {
-            // System.out.print("  for i = " + i + ", at(i) = " + nextAsList.get(i)); // DEBUG
-            if (i == nextAsList.size() - 1) { // last element
-                if (nextAsList.get(i) < max) {
-                    nextAsList.set(i, nextAsList.get(i) + 1);
-                    return new Tuple(nextAsList);
-                } else { // last element == max 
-                    continue;
-                }
-            } else { // not last element
-                if (nextAsList.get(i) + 1 < nextAsList.get(i+1)) {
-                    nextAsList.set(i, nextAsList.get(i) + 1);
-                    // every element after what was just changed is reduced to minimum possible combination
-                    for (int j = i + 1; j < nextAsList.size(); ++j) { 
-                        nextAsList.set(j, nextAsList.get(j-1) + 1);
-                    }
-                    return new Tuple(nextAsList);
-                } else {
-                    continue;
-                }
+    public Tuple getNextAscendingTupleAfter(Tuple subtuple) throws ProjectException {
+        int m = this.elements.length;
+        int n = subtuple.elements.length;
+        List<Integer> nextTuple = subtuple.toList();
+        for (int i = n - 1; i >= 0; --i) { // each next tuple element from last to first
+            if (nextTuple.get(i) >= this.get(m-(n-1-i)-1)) { // if ith last of next tuple is same or greater than ith of tuple
+                continue;
             }
-
+            int index = this.indexOf(subtuple.get(i)); // find index in tuple of value so get to the 'next' subtuple
+            nextTuple.set(i, this.elements[index+1]);
+            for (int j = i + 1; j < n; ++j) { // update subsequent elements to the lowest possible after the 'current' element
+                nextTuple.set(j, this.elements[index+(j-(i+1))+2]);
+            }
+            return new Tuple(nextTuple);
         }
         return null;
     }
 
-    public Tuple getNextAscendingTupleAfter(Tuple subTuple) throws ProjectException {
-        return getNextAscendingTupleAfter(subTuple, this.getMinInt(), this.getMaxInt());
+    /**Uses indexOf(), which implements binary search, to check if key exist in Tuple. (Tuple MUST be sorted in non-descending order)
+     * 
+     * @param key value to check if it exist in tuple
+     * @return true if key is in the tuple, false otherwise
+     */
+    public boolean contains(int key) {
+        int index = this.indexOf(key);
+        return index == -1 ? false : true; 
     }
 
-    public Tuple getNextTupleAfter(Tuple subTuple, int min, int max) throws ProjectException {
-        List<Integer> nextAsList = subTuple.toList();
-        for (int i = nextAsList.size() - 1; i >= 0; --i) {
-            if (nextAsList.get(i) < max) {
-                nextAsList.set(i, nextAsList.get(i) + 1);
-                return new Tuple(nextAsList);
+    /**Uses binary search to find the index of key in O(log n) time. (Tuple MUST be sorted in non-descending order)
+     * 
+     * @param key value to find the index of
+     * @return index of key, or -1 if key is not in the tuple
+     */
+    public int indexOf(int key) {
+        int low = 0;
+        int high = this.elements.length - 1;
+        while (low <= high) {
+            int mid = low + (high - low)/2;
+            if (this.elements[mid] == key) {//arr[1] == 1
+                return mid;
+            } else if (this.elements[mid] > key) {
+                high = mid - 1;
             } else {
-                nextAsList.set(i, min);
-            }
-        }
-        return null;
-    }
-
-    public Tuple getNextTupleAfter(Tuple subTuple) throws ProjectException {
-        return getNextTupleAfter(subTuple, this.getMinInt(), this.getMaxInt());
-    }
-
-    public int getMinInt() {
-        return this.get(minIntIndex());
-    }
-
-    public int getMaxInt() {
-        return this.get(maxIntIndex());
-    }
-
-    public int minIntIndex() {
-        int minIndex = 0;
-        for (int i = 0; i < this.size(); ++i) {
-            if (this.get(minIndex) > this.get(i)) {
-                minIndex = i;
-            }
-        }
-        return minIndex;
-    }
-
-    public int maxIntIndex() {
-        int maxIndex = 0;
-        for (int i = 0; i < this.size(); ++i) {
-            if (this.get(maxIndex) < this.get(i)) {
-                maxIndex = i;
-            }
-        }
-        return maxIndex;
-    }
-
-    public int containsInt(int key) {
-        for (int i = 0; i < elements.length; ++i) {
-            if (elements[i] == key) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public int contains(int key) {
-        for (int i = 0; i < elements.length; ++i) {
-            if (elements[i] == key) {
-                return i;
+                low = mid + 1;
             }
         }
         return -1;

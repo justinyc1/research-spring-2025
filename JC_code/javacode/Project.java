@@ -33,13 +33,18 @@ import java.util.ArrayList;
 public class Project {
     public static void main(String[] args) throws ProjectException, FileNotFoundException {
         // validate_set_V(5, 2);
-        // validate_set_V(9, 2);
+        // validate_set_V(27, 4);
         // validate_set_V(15, 2);
         
         // validate_set_V(27, 4, true);
-        validate_set_V(77, 4, true);
+        // validate_set_V(77, 4, true);
 
+        // test_all_m_and_d_combinations(9, 9, 1, 4);
+        test_all_m_and_d_combinations(8, 59, 4, 4);
         // test_all_m_and_d_combinations(73, 999, 4, 4, true);
+
+        // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
+        // for (int i = 0; i < myTuple1.size(); i++) { System.out.println("index of " + i + " is " + myTuple1.indexOf(i)); }
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws FileNotFoundException {
@@ -50,12 +55,12 @@ public class Project {
         Scanner sc = new Scanner(System.in);
         System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\r"); // a single enter press is now the separator.
-        for (int i = m_start; i <= m_end; ++i) { 
-            for (int j = d_start; j <= i/2 - 1 && j <= d_end; ++j) {    
+        for (int i = m_start; i <= m_end; ++i) {
+            for (int j = d_start; j <= (i-1)/2 && j <= d_end; ++j) {   
                 try {
                     validate_set_V(i, j, print_outputs); // m = 21, 2 <= d <= 8 is very interesting
                 } catch (ProjectException e) {
-                    e.printStackTrace();
+                    // e.printStackTrace(); // DEBUG
                     continue;
                 }
                 sc.next();
@@ -222,6 +227,7 @@ public class Project {
         int min_subset_size = 4;
         int max_subset_size = 2 * d - 2;
 
+        // TODO: what to do with tuple in no pairs when d = 1,2
         if (d >= 3) { // when d = 2 or less, alpha have at most 4 elements, so there is no indecomposables nor decomposable but no pairs 
             for (Tuple alpha : none_are_pairs) { // each element is an alpha with no pairs
                 boolean divides_m = false;
@@ -230,7 +236,8 @@ public class Project {
                     // go though each possible subtuple combination from alpha to find a subtuple that adds to multiple of m
 
                     // init subtuple
-                    subtuple = alpha.getSubTuple(0, size);
+                    subtuple = alpha.getSubtuple(0, size);
+                    // System.out.println("For tuple " + alpha + ", check subtuple " + subtuple);
 
                     // check init values divides m
                     if (subtuple.sum() % m == 0) {
@@ -246,19 +253,20 @@ public class Project {
                             break;
                         }
                         subtuple = alpha.getNextAscendingTupleAfter(subtuple);
+                        // System.out.println("For tuple " + alpha + ", check subtuple " + subtuple);
                     }
 
                     if (divides_m) break;
                 }
             // back to for each alpha
                 if (divides_m) {
-                    // System.out.println("adding to decomposable but no pairs set: " + alpha);
+                    // System.out.println("adding to decomposable but no pairs set: " + alpha + ", since subtuple = " + subtuple);
                     // if (print_outputs) pw.println("adding to decomposable but no pairs set: " + alpha);
                     no_pair_print_buffer.append("adding to decomposable but no pairs set: " + alpha + ", since subtuple = " + subtuple + "\n");
                     decomposable_but_no_pairs.add(alpha);
                     continue;
                 } else {
-                    // System.out.println("adding to indecomposable set: " + alpha);
+                    // System.out.println("adding to indecomposable set: " + alpha + ", since subtuple = " + subtuple);
                     // if (print_outputs) pw.println("adding to indecomposable set: " + alpha);
                     no_pair_print_buffer.append("adding to indecomposable set: " + alpha + "\n");
                     indecomposable.add(alpha);
