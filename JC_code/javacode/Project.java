@@ -33,27 +33,29 @@ import java.util.ArrayList;
 public class Project {
     public static void main(String[] args) throws ProjectException, FileNotFoundException {
         // validate_set_V(5, 2);
-        // validate_set_V(15, 2);
-
-        validate_set_V(9, 4);
-        // validate_set_V(27, 4);
+        // validate_set_V(45, 4);
+        // validate_set_V(69, 4);
         
         // validate_set_V(27, 4, true);
-        // validate_set_V(69, 4, true);
+        // validate_set_V(77, 4, true);
 
         // test_all_m_and_d_combinations(9, 9, 1, 4);
         // test_all_m_and_d_combinations(8, 59, 4, 4, true);
-        // test_all_m_and_d_combinations(72, 999, 4, 4, true);
+        test_all_m_and_d_combinations(75, 999, 4, 4, true, true);
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
         // for (int i = 0; i < myTuple1.size(); i++) { System.out.println("index of " + i + " is " + myTuple1.indexOf(i)); }
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws FileNotFoundException {
-        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, false);
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs) throws FileNotFoundException {
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, false);
+    }
+
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated) throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
         System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\r"); // a single enter press is now the separator.
@@ -65,7 +67,7 @@ public class Project {
                     // e.printStackTrace(); // DEBUG
                     continue;
                 }
-                sc.next();
+                if (!automated) sc.next();
             } 
         }
         sc.close();
@@ -116,8 +118,7 @@ public class Project {
         // for alpha tuple, range of each term: 1 <= a_i <= m-1
         int alpha_length = n + 2; // a_0, a_1, ... a_n, a_n+1
 
-        Set<Tuple> U_set = new HashSet<>(); // contains all alpha tuples that are valid for the U set
-        find_all_valid_alpha_combinations(U_set, m, alpha_length);
+        // Set<Tuple> U_set = new HashSet<>(); // contains all alpha tuples that are valid for the U set
         // by this point the U_set will have all valid alpha tuples
 
 
@@ -125,36 +126,14 @@ public class Project {
         // Set<Tuple> B_set = new HashSet<>(); // contains all alpha tuples that are valid for the B set
         //because all alpha tuples in B set is already in ascending order (due to the find all combination algorithm), all alpha tuples in set B are valid tuples for set V
         Set<Tuple> V_set = new HashSet<>(); // contains all tuples from the B set that are valid for the V set
-        int n_halved_plus_one = (n / 2) + 1;
+        find_all_valid_alpha_combinations(V_set, Z_mod_m_Z_star, m, alpha_length);
+        // int n_halved_plus_one = (n / 2) + 1;
         // System.out.println("n/2 + 1 = " + n_halved_plus_one);//DEBUG
 
-        // TODO: could use regular for loops for slightly faster time
-        for (Tuple alpha : U_set) {
-            boolean this_alpha_is_valid = true;
-            for (int t : Z_mod_m_Z_star) {
-
-                List<Integer> t_times_alpha_reduced_elements = new ArrayList<>();
-                double t_times_alpha_reduced_sum = 0;
-
-                for (int i = 0; i < alpha.size(); ++i) {
-                    int reduced_mod_m = (t * alpha.get(i)) % m;
-                    t_times_alpha_reduced_elements.add(reduced_mod_m);
-                    t_times_alpha_reduced_sum += reduced_mod_m;
-                }
-                t_times_alpha_reduced_sum /= m;
-
-                // System.out.println("for tuple " + alpha + " and t = " + t + ", t*a = " + t_times_alpha_reduced_elements + " and |t*a| = " + t_times_alpha_reduced_sum);//DEBUG
-                // System.out.printf("for tuple %-16s and t = %2d, t*a = %-16s and |t*a| = %1.0f\n", alpha.toString(), t, t_times_alpha_reduced_elements.toString(), t_times_alpha_reduced_sum);//DEBUG
-                if (t_times_alpha_reduced_sum != n_halved_plus_one) {
-                    this_alpha_is_valid = false;
-                    break; // if |t * alpha| != n/2 +1 for just one t, this alpha tuple is not valid for the B set
-                }
-            }
-            if (this_alpha_is_valid) {
-                // B_set.add(alpha);
-                V_set.add(alpha);
-            }
-        }
+        // TODO: could use regular for loops for slightly faster time (?)
+        // for (Tuple alpha : U_set) {
+        //     put_in_V_set_if_valid(V_set, Z_mod_m_Z_star, alpha, m, n_halved_plus_one);
+        // }
 
         // for (Tuple tuple : B_set) {
         //     // if the tuple is in ascending order, in the range [1, m-1], it is valid tuple for V set
@@ -344,7 +323,7 @@ public class Project {
         System.out.println("Calculations took " + formattedElapsedTime + ".");
         System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size ", 2*d) + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
         System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size 1 to ", 2*d) + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
-        System.out.println("            " +"\"reduced\" " + redString("U") + " set: contains " + redString(U_set.size()) + " tuples");
+        // System.out.println("            " +"\"reduced\" " + redString("U") + " set: contains " + redString(U_set.size()) + " tuples");
         // System.out.println("            " + "\"reduced\" " + redString("B") + " set: contains " + redString(B_set.size()) + " tuples");
         System.out.println("                      " + redString("V") + " set: contains " + redString(V_set.size()) + " tuples");
         System.out.println("          " + redString("all") + "_are_pairs" + " set: contains " + redString(all_are_pairs.size()) + " tuples");
@@ -361,7 +340,7 @@ public class Project {
         if (print_outputs) pw.println("Z/mZ*: " + Z_mod_m_Z_star.toString());
         if (print_outputs) pw.println("All ascending & non-repeating tuple (size " + 2*d + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
         if (print_outputs) pw.println("All ascending & non-repeating tuple (size 1 to " + 2*d + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
-        if (print_outputs) pw.println("            " +"\"reduced\" U set: contains " + U_set.size() + " tuples");
+        // if (print_outputs) pw.println("            " +"\"reduced\" U set: contains " + U_set.size() + " tuples");
         // if (print_outputs) pw.println("            \"reduced\" B set: contains " + B_set.size() + " tuples");
         if (print_outputs) pw.println("                      V set: contains " + V_set.size() + " tuples");
         if (print_outputs) pw.println("          all_are_pairs set: contains " + all_are_pairs.size() + " tuples");
@@ -427,27 +406,24 @@ public class Project {
 
     /** Calls the recursive algorithm to find all valid ascending combinations of alpha tuple
      * 
-     * @param U_set - the set that contains all valid alpha tuples
+     * @param V_set
      * @param m - the upper limit (exclusive) of Z/mZ when finding combinations
      * @param alpha_length - length of each alpha tuple, determined by n
      */
-    public static void find_all_valid_alpha_combinations(Set<Tuple> U_set, int m, int alpha_length) throws ProjectException {
+    public static void find_all_valid_alpha_combinations(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int alpha_length) throws ProjectException {
         int[] this_combination = new int[alpha_length];
-        recursively_find_all(U_set, m, this_combination, 0, 1);
+        recursively_find_all(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
     }
 
     /** Recursively find all valid ascending combinations of alpha tuple, using the values of Z/mZ (excluding 0)
      * 
-     * @param U_set - the set that contains all valid alpha tuples
-     * @param ZmmZ_array - Z/mZ as an array
+     * @param V_set
      * @param m 
-     * @param alpha_length - length of each alpha tuple, determined by n
-     * @param this_combination - a List that contains all the elements in the alpha tuple for the current loop
+     * @param this_combination - an array that contains all the elements in the alpha tuple for the current loop
      * @param sum - stores the sum of the elements in this_combination
-     * @param begin - the index of the smallest value that this current position can be
      * @param depth - the current level of the recursion method
      */
-    private static void recursively_find_all(Set<Tuple> U_set, int m, int[] this_combination, int sum, int depth) throws ProjectException {
+    private static void recursively_find_all(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int[] this_combination, int sum, int depth, int n_halved_plus_one) throws ProjectException {
         // System.out.println(); // DEBUG
         if (depth > this_combination.length) {
             // System.out.println("depth = " + depth + "   returning"); // DEBUG
@@ -464,15 +440,46 @@ public class Project {
             // System.out.println(toString(this_combination, depth) + "   depth = " + depth + "   sum: " + sum); // DEBUG
 
             // if (this_combination.size() == alpha_length) System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
-            if (depth == this_combination.length && sum % m == 0) U_set.add(new Tuple(this_combination));
+            if (depth == this_combination.length && sum % m == 0) {
+                // V_set.add(new Tuple(this_combination));
+                put_in_V_set_if_valid(V_set, ZmmZ_star, this_combination, m, n_halved_plus_one);
+            }
             
-            recursively_find_all(U_set, m, this_combination, sum, depth+1);
+            recursively_find_all(V_set, ZmmZ_star, m, this_combination, sum, depth+1, n_halved_plus_one);
             
             // System.out.print("subtracting from sum = " + sum + " by last element at index " + depth + "-1 = " + this_combination[depth-1]); // DEBUG
             // sum -= this_combination[depth-1];
             sum -= i;
             // System.out.println("   sum is now = " + sum); // DEBUG
             // this_combination[depth-1] = 0; // dont need to be removed, but could get garbage values based on implementation
+        }
+    }
+
+    public static void put_in_V_set_if_valid(Set<Tuple> V_set, Set<Integer> Z_mod_m_Z_star, int[] alpha, int m, int n_halved_plus_one) {
+        boolean this_alpha_is_valid = true;
+        // System.out.println(n_halved_plus_one);
+        for (int t : Z_mod_m_Z_star) {
+
+            List<Integer> t_times_alpha_reduced_elements = new ArrayList<>();
+            double t_times_alpha_reduced_sum = 0;
+
+            for (int i = 0; i < alpha.length; ++i) {
+                int reduced_mod_m = (t * alpha[i]) % m;
+                t_times_alpha_reduced_elements.add(reduced_mod_m);
+                t_times_alpha_reduced_sum += reduced_mod_m;
+            }
+            t_times_alpha_reduced_sum /= m;
+
+            // System.out.println("for tuple " + alpha + " and t = " + t + ", t*a = " + t_times_alpha_reduced_elements + " and |t*a| = " + t_times_alpha_reduced_sum);//DEBUG
+            // System.out.printf("for tuple %-16s and t = %2d, t*a = %-16s and |t*a| = %1.0f\n", alpha.toString(), t, t_times_alpha_reduced_elements.toString(), t_times_alpha_reduced_sum);//DEBUG
+            if (t_times_alpha_reduced_sum != n_halved_plus_one) {
+                this_alpha_is_valid = false;
+                break; // if |t * alpha| != n/2 +1 for just one t, this alpha tuple is not valid for the B set
+            }
+        }
+        if (this_alpha_is_valid) {
+            // B_set.add(alpha);
+            V_set.add(new Tuple(alpha));
         }
     }
 
