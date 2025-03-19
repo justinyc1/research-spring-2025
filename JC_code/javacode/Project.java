@@ -33,15 +33,17 @@ import java.util.ArrayList;
 public class Project {
     public static void main(String[] args) throws ProjectException, FileNotFoundException {
         // validate_set_V(5, 2);
-        // validate_set_V(27, 4);
         // validate_set_V(15, 2);
+
+        validate_set_V(9, 4);
+        // validate_set_V(27, 4);
         
         // validate_set_V(27, 4, true);
-        // validate_set_V(77, 4, true);
+        // validate_set_V(69, 4, true);
 
         // test_all_m_and_d_combinations(9, 9, 1, 4);
         // test_all_m_and_d_combinations(8, 59, 4, 4, true);
-        test_all_m_and_d_combinations(60, 999, 4, 4, true);
+        // test_all_m_and_d_combinations(72, 999, 4, 4, true);
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
         // for (int i = 0; i < myTuple1.size(); i++) { System.out.println("index of " + i + " is " + myTuple1.indexOf(i)); }
