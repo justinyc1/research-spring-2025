@@ -41,7 +41,7 @@ public class Project {
 
         // test_all_m_and_d_combinations(9, 9, 1, 4);
         // test_all_m_and_d_combinations(8, 59, 4, 4, true);
-        test_all_m_and_d_combinations(75, 999, 4, 4, true, true);
+        test_all_m_and_d_combinations(85, 999, 4, 4, true, true);
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
         // for (int i = 0; i < myTuple1.size(); i++) { System.out.println("index of " + i + " is " + myTuple1.indexOf(i)); }
@@ -424,7 +424,6 @@ public class Project {
      * @param depth - the current level of the recursion method
      */
     private static void recursively_find_all(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int[] this_combination, int sum, int depth, int n_halved_plus_one) throws ProjectException {
-        // System.out.println(); // DEBUG
         if (depth > this_combination.length) {
             // System.out.println("depth = " + depth + "   returning"); // DEBUG
             return;
@@ -434,6 +433,7 @@ public class Project {
         if (depth > 1) prev = this_combination[depth-2];
         // System.out.println("for comb " + toString(this_combination) + " the prev is " + prev); // DEBUG
         for (int i = Integer.max(depth, prev + 1); i <= m - 1 - this_combination.length + depth; ++i) {
+            if (depth == 1) System.out.println(this_combination[0] + " out of " + (m-this_combination.length)); // DEBUG
             this_combination[depth-1] = i;
             sum += i;
 
