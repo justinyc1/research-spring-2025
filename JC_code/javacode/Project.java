@@ -42,7 +42,8 @@ public class Project {
 
         // test_all_m_and_d_combinations(9, 9, 1, 4);
         // test_all_m_and_d_combinations(8, 59, 4, 4, true);
-        test_all_m_and_d_combinations(93, 999, 4, 4, true, true);
+        // test_all_m_and_d_combinations(49, 49, 1, 999, true, true);
+        test_all_m_and_d_combinations(123, 999, 4, 4, true, true);
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
         // for (int i = 0; i < myTuple1.size(); i++) { System.out.println("index of " + i + " is " + myTuple1.indexOf(i)); }
@@ -58,7 +59,7 @@ public class Project {
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated) throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Press the Enter Key to process the next m and d values");
+        if (!automated) System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\r"); // a single enter press is now the separator.
         for (int i = m_start; i <= m_end; ++i) {
             for (int j = d_start; j <= (i-1)/2 && j <= d_end; ++j) {
