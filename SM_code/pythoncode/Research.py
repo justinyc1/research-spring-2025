@@ -7,7 +7,9 @@ Description -- Post Meeting on 3/10/25
         - Generate length d tuples implementing the reverse tuple idea.
 """
 
+# IMPORTS:
 import math
+import os
 from itertools import combinations
 
 """
@@ -188,44 +190,46 @@ def indecomposable(m, d, no_pairs):
 
 
 def main():
-    m = 49
-    d = 5
-    filename = f"m_{m}_d_{d}_output.txt"
-    # with open(filename, "w") as file:
-    #     file.write(f"These are the tuples for m = {m} and d = {d}")
-    z_star = zmodmzstarset(m)
-    with open(filename, "w") as file:
-        file.write(f"For m = {m} and d = {d}\n")
-        file.write(f"These are integers in the z mod m z star set for m = {m}\n {z_star}\n")
-    v_tuple_list = v_set(m, d, z_star)
-    e_tuple_list, no_pairs = e_set(m, v_tuple_list)
-    indecomposable_list = indecomposable(m, d, no_pairs)
+    m = 9
+    for d in range(1, ((m-1)//2)+1):
+        save_path = r'C:\Users\sabee\PycharmProjects\research-spring-2025\SM_code\output'
+        filename = f"m_{m}_d_{d}_output.txt"
+        full_path = os.path.join(save_path, filename)
+        # with open(filename, "w") as file:
+        #     file.write(f"These are the tuples for m = {m} and d = {d}")
+        z_star = zmodmzstarset(m)
+        with open(full_path, "w") as file:
+            file.write(f"For m = {m} and d = {d}\n")
+            file.write(f"These are integers in the z mod m z star set for m = {m}\n {z_star}\n")
+        v_tuple_list = v_set(m, d, z_star)
+        e_tuple_list, no_pairs = e_set(m, v_tuple_list)
+        indecomposable_list = indecomposable(m, d, no_pairs)
 
-    # print summary & tuples
-    with open(filename, "a") as file:
-        # printing summary
-        file.write(f"The number of tuple(s) in the V set is: {len(v_tuple_list)}\n")
-        file.write(f"The number of tuple(s) in the E set is: {len(e_tuple_list)}\n")
-        file.write(f"The number of tuple(s) with no pairs is: {len(no_pairs)}\n")
-        # file.write(no_pairs)
-        file.write(f"The number of indecomposable tuple(s) is: {len(indecomposable_list)}\n\n")
+        # print summary & tuples
+        with open(full_path, "a") as file:
+            # printing summary
+            file.write(f"The number of tuple(s) in the V set is: {len(v_tuple_list)}\n")
+            file.write(f"The number of tuple(s) in the E set is: {len(e_tuple_list)}\n")
+            file.write(f"The number of tuple(s) with no pairs is: {len(no_pairs)}\n")
+            # file.write(no_pairs)
+            file.write(f"The number of indecomposable tuple(s) is: {len(indecomposable_list)}\n\n")
 
-        # printing tuples
-        file.write(f"The tuples in the V set are:\n")
-        for x in v_tuple_list:
-            file.write(f"{x}\n")
-        file.write(f"The number of tuple(s) in the V set is: {len(v_tuple_list)}\n")
-        file.write(f"\n")
-        # file.write(f"The tuples in the E set are:\n")
-        # for x in e_tuple_list:
-        #     file.write(f"{x}\n")
-        # file.write(f"The number of tuple(s) in the E set is: {len(e_tuple_list)}\n")
-        # file.write(f"The number of tuple(s) with no pairs is: {len(no_pairs)}\n")
-        # file.write(no_pairs)
-        file.write(f"The indecomposable tuples are:\n")
-        for x in indecomposable_list:
-            file.write(f"{x}\n")
-        file.write(f"The number of indecomposable tuple(s) is: {len(indecomposable_list)}\n")
+            # printing tuples
+            file.write(f"The tuples in the V set are:\n")
+            for x in v_tuple_list:
+                file.write(f"{x}\n")
+            file.write(f"The number of tuple(s) in the V set is: {len(v_tuple_list)}\n")
+            file.write(f"\n")
+            # file.write(f"The tuples in the E set are:\n")
+            # for x in e_tuple_list:
+            #     file.write(f"{x}\n")
+            # file.write(f"The number of tuple(s) in the E set is: {len(e_tuple_list)}\n")
+            # file.write(f"The number of tuple(s) with no pairs is: {len(no_pairs)}\n")
+            # file.write(no_pairs)
+            file.write(f"The indecomposable tuples are:\n")
+            for x in indecomposable_list:
+                file.write(f"{x}\n")
+            file.write(f"The number of indecomposable tuple(s) is: {len(indecomposable_list)}\n")
 
 
 main()
