@@ -190,7 +190,7 @@ def indecomposable(m, d, no_pairs):
 
 
 def main():
-    m = 9
+    m = 7**2
     for d in range(1, ((m-1)//2)+1):
         save_path = r'C:\Users\sabee\PycharmProjects\research-spring-2025\SM_code\output'
         filename = f"m_{m}_d_{d}_output.txt"
