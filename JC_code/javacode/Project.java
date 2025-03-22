@@ -43,7 +43,7 @@ public class Project {
         // test_all_m_and_d_combinations(9, 9, 1, 4);
         // test_all_m_and_d_combinations(8, 59, 4, 4, true);
         // test_all_m_and_d_combinations(49, 49, 1, 999, true, true);
-        test_all_m_and_d_combinations(123, 999, 4, 4, true, true);
+        test_all_m_and_d_combinations(127, 999, 4, 4, true, true);
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
         // for (int i = 0; i < myTuple1.size(); i++) { System.out.println("index of " + i + " is " + myTuple1.indexOf(i)); }
