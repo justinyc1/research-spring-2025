@@ -56,24 +56,46 @@ OUTPUT:
 
 def v_set(m, d, z_star):
     count = 0
-    small_tuple_list = []
+    half_tuples_list = []
+    reverse_half_tuples_list = []
     v_list = []
     print("These are the half tuple(s) in the U set: ")
     for combo in combinations(range(1, ((m-1)//2)+1), d):
-        small_tuple_list.append(combo)
+        half_tuples_list.append(combo)
+        reverse_half_tuples_list.append(tuple(m-alpha for alpha in reversed(combo)))
         print(combo)
         count += 1
 
+
     print("These are the tuple(s) in the V set: ")
-    for half_tuple in small_tuple_list:
+    for half_tuple in half_tuples_list:
         i = 0
-        while i < len(small_tuple_list):
-            new_tuple = half_tuple + tuple(m-alpha for alpha in reversed(small_tuple_list[i]))
-            if sum(new_tuple) == m*d:
-                if verify_v_property(new_tuple, m, d, z_star):
-                    print(new_tuple)
-                    v_list.append(new_tuple)
-            i += 1
+        while i < len(reverse_half_tuples_list):
+            if sum(half_tuple) + sum(reverse_half_tuples_list[i]) == m*d:
+                if verify_v_property(half_tuple, reverse_half_tuples_list[i], m, d, z_star):
+                    print(half_tuple+reverse_half_tuples_list[i])
+                    v_list.append(half_tuple+reverse_half_tuples_list[i])
+            i+=1
+
+    # ATTEMPT 1
+    # for half_tuple in half_tuples_list:
+    #     i = 0
+    #     while i < len(half_tuples_list):
+    #         new_tuple = half_tuple + tuple(m-alpha for alpha in reversed(half_tuples_list[i]))
+    #         if sum(new_tuple) == m*d:
+    #             if verify_v_property(new_tuple, m, d, z_star):
+    #                 print(new_tuple)
+    #                 v_list.append(new_tuple)
+    #         i += 1
+
+    # ATTEMPT 2
+    # for i in range(0, len(half_tuples_list)):
+    #     for j in range(0, len(half_tuples_list)):
+    #         new_tuple = tuple(m-alpha for alpha in reversed(half_tuples_list[j]))
+    #         if sum(half_tuples_list[i] + new_tuple) == m*d:
+    #             if verify_v_property(half_tuples_list[i], new_tuple, m, d, z_star):
+    #                 print(half_tuples_list[i] + new_tuple)
+    #                 v_list.append(half_tuples_list[i] + new_tuple)
     # print("These are the tuple(s) in the V set: ")
     # print(tuple_list)
     print("The number of tuple(s) is ", len(v_list))
@@ -97,13 +119,14 @@ OUTPUT:
 """
 
 
-def verify_v_property(u_tuple, m, d, z_star):
+def verify_v_property(half_tuple_one, half_tuple_two, m, d, z_star):
     t_count = 0
+    new_tuple = half_tuple_one + half_tuple_two
     for t in z_star:
         i = 0
         sum = 0
         while i < 2 * d:
-            sum += ((u_tuple[i] * t) % m)
+            sum += ((new_tuple[i] * t) % m)
             i += 1
         if (sum / m) == d:
             t_count = t_count + 1
@@ -190,7 +213,7 @@ def indecomposable(m, d, no_pairs):
 
 
 def main():
-    m = 7**2
+    m = 11**2
     for d in range(1, ((m-1)//2)+1):
         save_path = r'C:\Users\sabee\PycharmProjects\research-spring-2025\SM_code\output'
         filename = f"m_{m}_d_{d}_output.txt"

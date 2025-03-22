@@ -1,13 +1,12 @@
 For m = 121 and d = 3
 These are integers in the z mod m z star set for m = 121
  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120]
-The number of tuple(s) in the U set is: 20681283
-The number of tuple(s) in the V/B set is: 34220
+The number of tuple(s) in the V set is: 34220
 The number of tuple(s) in the E set is: 0
 The number of tuple(s) with no pairs is: 0
 The number of indecomposable tuple(s) is: 0
 
-The tuples in the V/B set are:
+The tuples in the V set are:
 (1, 2, 3, 118, 119, 120)
 (1, 2, 4, 117, 119, 120)
 (1, 2, 5, 116, 119, 120)
@@ -34228,7 +34227,7 @@ The tuples in the V/B set are:
 (57, 58, 60, 61, 63, 64)
 (57, 59, 60, 61, 62, 64)
 (58, 59, 60, 61, 62, 63)
-The number of tuple(s) in the V/B set is: 34220
+The number of tuple(s) in the V set is: 34220
 
 The indecomposable tuples are:
 The number of indecomposable tuple(s) is: 0
