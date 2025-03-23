@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Project {
     public static void main(String[] args) throws ProjectException, FileNotFoundException {
@@ -41,7 +42,8 @@ public class Project {
 
         // test_all_m_and_d_combinations(9, 9, 1, 4);
         // test_all_m_and_d_combinations(8, 59, 4, 4, true);
-        test_all_m_and_d_combinations(85, 999, 4, 4, true, true);
+        // test_all_m_and_d_combinations(49, 49, 1, 999, true, true);
+        test_all_m_and_d_combinations(127, 999, 4, 4, true, true);
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
         // for (int i = 0; i < myTuple1.size(); i++) { System.out.println("index of " + i + " is " + myTuple1.indexOf(i)); }
@@ -57,16 +59,18 @@ public class Project {
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated) throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Press the Enter Key to process the next m and d values");
+        if (!automated) System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\r"); // a single enter press is now the separator.
         for (int i = m_start; i <= m_end; ++i) {
-            for (int j = d_start; j <= (i-1)/2 && j <= d_end; ++j) {   
+            for (int j = d_start; j <= (i-1)/2 && j <= d_end; ++j) {
+                System.out.println("Starting time for m = " + i + ", d = " + j + " is " + new Date());
                 try {
                     validate_set_V(i, j, print_outputs); // m = 21, 2 <= d <= 8 is very interesting
                 } catch (ProjectException e) {
                     // e.printStackTrace(); // DEBUG
                     continue;
                 }
+                System.out.println("Ending time for m = " + i + ", d = " + j + " is " + new Date());
                 if (!automated) sc.next();
             } 
         }
@@ -433,7 +437,7 @@ public class Project {
         if (depth > 1) prev = this_combination[depth-2];
         // System.out.println("for comb " + toString(this_combination) + " the prev is " + prev); // DEBUG
         for (int i = Integer.max(depth, prev + 1); i <= m - 1 - this_combination.length + depth; ++i) {
-            if (depth == 1) System.out.println(this_combination[0] + " out of " + (m-this_combination.length)); // DEBUG
+            // if (depth == 1) System.out.println((this_combination[0]+1) + " out of " + (m-this_combination.length)); // DEBUG 
             this_combination[depth-1] = i;
             sum += i;
 
