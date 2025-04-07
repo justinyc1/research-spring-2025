@@ -25,14 +25,24 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class Project {
-    public static void main(String[] args) throws ProjectException, FileNotFoundException {
+    static long startTimeInNano = -1;
+    static int maxSecondsAllowed = -1;
+    static boolean skipToNextM = false;
+    static boolean allowOverwrite = false;
+    static boolean validate_split_in_halves = false;
+    static int valid_split_in_half_count = 0;
+    static PrintWriter debugOutput = null;
+    public static void main(String[] args) throws ProjectException, IOException {
         // validate_set_V(5, 2);
         // validate_set_V(45, 4);
         // validate_set_V(69, 4);
@@ -40,29 +50,42 @@ public class Project {
         // validate_set_V(27, 4, true);
         // validate_set_V(77, 4, true);
 
-        // test_all_m_and_d_combinations(9, 9, 1, 4);
-        // test_all_m_and_d_combinations(8, 59, 4, 4, true);
-        // test_all_m_and_d_combinations(49, 49, 1, 999, true, true);
-        test_all_m_and_d_combinations(127, 999, 4, 4, true, true);
+        // test_all_m_and_d_combinations(49, 49, 15, 15, true, true, false, -1, false);
+
+        test_all_m_and_d_combinations(1, 161, 1, 999, false, true, false, 600, true);
+        
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
         // for (int i = 0; i < myTuple1.size(); i++) { System.out.println("index of " + i + " is " + myTuple1.indexOf(i)); }
     }
 
-    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws FileNotFoundException {
-        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, false, false);
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws IOException {
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, false, false, false, -1, false);
     }
 
-    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs) throws FileNotFoundException {
-        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, false);
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs) throws IOException {
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, false, false, -1, false);
     }
 
-    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated) throws FileNotFoundException {
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated) throws IOException {
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, automated, false, -1, false);
+    }
+
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated, boolean overwrite_outputs, int max_seconds_allowed, boolean validate_halves) throws IOException {
+        allowOverwrite = overwrite_outputs;
+        maxSecondsAllowed = max_seconds_allowed;
+        validate_split_in_halves = validate_halves;
         Scanner sc = new Scanner(System.in);
         if (!automated) System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\r"); // a single enter press is now the separator.
         for (int i = m_start; i <= m_end; ++i) {
+            skipToNextM = false;
             for (int j = d_start; j <= (i-1)/2 && j <= d_end; ++j) {
+                FileHelper.deleteAllEmptyFiles(new File(FileHelper.outputsDir)); // delete empty files
+                if (skipToNextM) {
+                    System.out.println("Skipping m = " + i);
+                    break;
+                }
                 System.out.println("Starting time for m = " + i + ", d = " + j + " is " + new Date());
                 try {
                     validate_set_V(i, j, print_outputs); // m = 21, 2 <= d <= 8 is very interesting
@@ -77,7 +100,7 @@ public class Project {
         sc.close();
     }
 
-    public static void validate_set_V(int m, int d) throws ProjectException, FileNotFoundException {
+    public static void validate_set_V(int m, int d) throws ProjectException, IOException {
         validate_set_V(m, d, false);
     }
 
@@ -86,21 +109,27 @@ public class Project {
      * @param m - An positve odd integer
      * @param d - An positive integer in the range: 1 <= d <= (m-1)/2
      */
-    public static void validate_set_V(int m, int d, boolean print_outputs) throws ProjectException, FileNotFoundException {
+    public static void validate_set_V(int m, int d, boolean print_outputs) throws ProjectException, IOException {
         System.out.println("Running method validate_set_V(" + redString("m = ", m) + ", " + redString("d = ", d) + "):\n");
         
         validate_m_and_d(m, d);
 
         String filepath = "JC_code\\outputs\\";
+        
         String filename = "output_for_m_" + m + "_d_" + d + ".txt";
+        File currentFile = new File(filepath + filename);
+        if (print_outputs && !allowOverwrite && currentFile.exists() && !currentFile.isDirectory()) {
+            throw new ProjectException("overwrite_outputs disabled and printing to file enabled, while file for m = " + m + ", d = " + d + " already exists.");
+        }
         PrintWriter pw = new PrintWriter(filepath + "test.txt");
         if (print_outputs) {
-            pw = new PrintWriter(filepath + filename);
+            pw = new PrintWriter(currentFile);
         }
 
         if (print_outputs) pw.println("Running method validate_set_V(m = " + m + ", d = " + d + "):\n");
 
         long startTime = System.nanoTime();
+        startTimeInNano = startTime;
 
         //TODO: extract this section into a method
         //===== create and put valid values in 'Z/mZ' and 'Z/mZ*' set =====
@@ -413,10 +442,17 @@ public class Project {
      * @param V_set
      * @param m - the upper limit (exclusive) of Z/mZ when finding combinations
      * @param alpha_length - length of each alpha tuple, determined by n
+     * @throws IOException 
      */
-    public static void find_all_valid_alpha_combinations(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int alpha_length) throws ProjectException {
+    public static void find_all_valid_alpha_combinations(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int alpha_length) throws ProjectException, IOException {
         int[] this_combination = new int[alpha_length];
-        recursively_find_all(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
+        if (validate_split_in_halves) {
+            debugOutput = new PrintWriter(new FileWriter("JC_code\\outputs\\" + "debug_output.txt", true));
+            recursively_find_all_check_halves(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
+            debugOutput.close();
+        } else {
+            recursively_find_all(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
+        }
     }
 
     /** Recursively find all valid ascending combinations of alpha tuple, using the values of Z/mZ (excluding 0)
@@ -459,7 +495,46 @@ public class Project {
         }
     }
 
-    public static void put_in_V_set_if_valid(Set<Tuple> V_set, Set<Integer> Z_mod_m_Z_star, int[] alpha, int m, int n_halved_plus_one) {
+    private static void recursively_find_all_check_halves(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int[] this_combination, int sum, int depth, int n_halved_plus_one) throws ProjectException, FileNotFoundException {
+        if (depth > this_combination.length) {
+            // System.out.println("depth = " + depth + "   returning"); // DEBUG
+            return;
+        }
+        
+        int prev = 0;
+        if (depth > 1) prev = this_combination[depth-2];
+        // System.out.println("for comb " + toString(this_combination) + " the prev is " + prev); // DEBUG
+        for (int i = Integer.max(depth, prev + 1); i <= m - 1 - this_combination.length + depth; ++i) {
+            // if (depth == 1) System.out.println((this_combination[0]+1) + " out of " + (m-this_combination.length)); // DEBUG 
+            this_combination[depth-1] = i;
+            sum += i;
+
+            // debugOutput.println(depth + " " + toString(this_combination));
+            // System.out.println(depth + " " + toString(this_combination));
+    
+            // System.out.println(toString(this_combination, depth) + "   depth = " + depth + "   sum: " + sum); // DEBUG
+
+            // if (this_combination.size() == alpha_length) System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
+            if (depth == this_combination.length && sum % m == 0) {
+                // V_set.add(new Tuple(this_combination));
+                // validate_split_halves(this_combination, m); // DEBUG
+                put_in_V_set_if_valid_and_check_halves(V_set, ZmmZ_star, this_combination, m, n_halved_plus_one);
+            }
+            
+            recursively_find_all_check_halves(V_set, ZmmZ_star, m, this_combination, sum, depth+1, n_halved_plus_one);
+            
+            // System.out.print("subtracting from sum = " + sum + " by last element at index " + depth + "-1 = " + this_combination[depth-1]); // DEBUG
+            // sum -= this_combination[depth-1];
+            sum -= i;
+            // System.out.println("   sum is now = " + sum); // DEBUG
+            // this_combination[depth-1] = 0; // dont need to be removed, but could get garbage values based on implementation
+        }
+    }
+
+    public static void put_in_V_set_if_valid(Set<Tuple> V_set, Set<Integer> Z_mod_m_Z_star, int[] alpha, int m, int n_halved_plus_one) throws ProjectException {
+        if (maxSecondsAllowed > 0) { // has time limit
+            terminate_if_longer_than_n_seconds(maxSecondsAllowed);
+        }
         boolean this_alpha_is_valid = true;
         // System.out.println(n_halved_plus_one);
         for (int t : Z_mod_m_Z_star) {
@@ -484,6 +559,67 @@ public class Project {
         if (this_alpha_is_valid) {
             // B_set.add(alpha);
             V_set.add(new Tuple(alpha));
+        }
+    }
+
+    public static void put_in_V_set_if_valid_and_check_halves(Set<Tuple> V_set, Set<Integer> Z_mod_m_Z_star, int[] alpha, int m, int n_halved_plus_one) throws ProjectException {
+        if (maxSecondsAllowed > 0) { // has time limit
+            terminate_if_longer_than_n_seconds(maxSecondsAllowed);
+        }
+        boolean this_alpha_is_valid = true;
+        // System.out.println(n_halved_plus_one);
+        for (int t : Z_mod_m_Z_star) {
+
+            List<Integer> t_times_alpha_reduced_elements = new ArrayList<>();
+            double t_times_alpha_reduced_sum = 0;
+
+            for (int i = 0; i < alpha.length; ++i) {
+                int reduced_mod_m = (t * alpha[i]) % m;
+                t_times_alpha_reduced_elements.add(reduced_mod_m);
+                t_times_alpha_reduced_sum += reduced_mod_m;
+            }
+            t_times_alpha_reduced_sum /= m;
+
+            // System.out.println("for tuple " + alpha + " and t = " + t + ", t*a = " + t_times_alpha_reduced_elements + " and |t*a| = " + t_times_alpha_reduced_sum);//DEBUG
+            // System.out.printf("for tuple %-16s and t = %2d, t*a = %-16s and |t*a| = %1.0f\n", alpha.toString(), t, t_times_alpha_reduced_elements.toString(), t_times_alpha_reduced_sum);//DEBUG
+            if (t_times_alpha_reduced_sum != n_halved_plus_one) {
+                this_alpha_is_valid = false;
+                break; // if |t * alpha| != n/2 +1 for just one t, this alpha tuple is not valid for the B set
+            }
+        }
+        if (this_alpha_is_valid) {
+            // B_set.add(alpha);
+            validate_split_halves(alpha, m); // DEBUG
+            V_set.add(new Tuple(alpha));
+        }
+    }
+
+    public static void validate_split_halves(int[] tuple_array, int m) throws ProjectException {
+        int n = tuple_array.length;
+        int m_minus_one_divided_by_two = (m-1)/2;
+        int invalid_index = -1;
+        for (int j = 0; j < n; j++) {
+            if (j < n/2) { // left half
+                if (tuple_array[j] > m_minus_one_divided_by_two) {
+                    invalid_index = j;
+                    break;
+                }
+            } else { // right half
+                if (tuple_array[j] < m_minus_one_divided_by_two) {
+                    invalid_index = j;
+                    break;
+                }
+            }
+        }
+        if (invalid_index == -1) { // normal
+            valid_split_in_half_count++;
+            if (valid_split_in_half_count % 1000 == 0) {
+                System.out.println(valid_split_in_half_count + " tuples checked are valid halves.");
+            }
+        } else { // anomaly
+            System.out.printf("For m = %d, d = %d, the tuple %s at index %d violates the two halves observation, after %d normal combinations in a row.\n", m, tuple_array.length, toString(tuple_array), invalid_index, valid_split_in_half_count);
+            debugOutput.append(String.format("\nFor m = %d, d = %d, the tuple in U set %s at index %d violates the two halves observation, after %d normal combinations in a row.\n", m, tuple_array.length, toString(tuple_array), invalid_index, valid_split_in_half_count));
+            valid_split_in_half_count = 0;
         }
     }
 
@@ -516,6 +652,18 @@ public class Project {
             sum -= tuple.get(i);
         }
         return false;
+    }
+
+    public static void terminate_if_longer_than_n_seconds(int n) throws ProjectException {
+        if (startTimeInNano == -1) {
+            throw new ProjectException("Error: StartTimeInNano was never set.");
+        }
+        long elapsedInNano = System.nanoTime() - startTimeInNano;
+        long elapsedInSeconds = elapsedInNano / 1000000000L;
+        if (elapsedInSeconds > n) {
+            skipToNextM = true;
+            throw new ProjectException("Time limit exceeded " + n + " seconds.");
+        }
     }
 
     public static String redString(Object obj) {
@@ -554,6 +702,7 @@ public class Project {
         return sb.toString();
     }
 
+    
     public static String toString(int[] arr) throws ProjectException {
         return toString(arr, arr.length);
     }
@@ -597,6 +746,22 @@ public class Project {
 
     public static String plural(int num) {
         return num == 1 ? "" : "s";
+    }
+
+    static boolean isPrime(int n) {
+        if (n <= 1) return false;
+
+        if (n == 2 || n == 3) return true;
+
+        if (n % 2 == 0 || n % 3 == 0) return false;
+        
+        for (int i = 5; i <= Math.sqrt(n); i = i + 6) {
+            if (n % i == 0 || n % (i + 2) == 0) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /** Return the gcd of a and b using the euclidean algorithm
