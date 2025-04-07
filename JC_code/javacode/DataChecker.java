@@ -1,8 +1,5 @@
 package JC_code.javacode;
 
-import java.io.File;
-import java.io.PrintWriter;
-
 public class DataChecker {
     public static void main(String[] args) {
         // validateOutputFileData(new File(FileHelper.outputsDir), 0, 0, 0, 0);
