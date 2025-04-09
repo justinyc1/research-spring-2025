@@ -52,7 +52,7 @@ public class Project {
 
         // test_all_m_and_d_combinations(49, 49, 15, 15, true, true, false, -1, false);
 
-        test_all_m_and_d_combinations(1, 161, 1, 999, false, true, false, 600, true);
+        test_all_m_and_d_combinations(3, 3, 1, 999, false, true, false, 600, false);
         
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
@@ -241,7 +241,8 @@ public class Project {
         int min_subset_size = 4;
         int max_subset_size = 2 * d - 2;
 
-        // TODO: what to do with tuple in no pairs when d = 1,2
+        // TODO: what to do with tuple in no pairs when d = 1,2 (d=1 => 2 elements = all pairs, d=2 =>  )
+        // TODO: for d >= 3, check subtuples of 'half size' instead of full size (?)
         if (d >= 3) { // when d = 2 or less, alpha have at most 4 elements, so there is no indecomposables nor decomposable but no pairs 
             for (Tuple alpha : none_are_pairs) { // each element is an alpha with no pairs
                 boolean divides_m = false;
@@ -431,8 +432,6 @@ public class Project {
     public static void validate_m_and_d(int m, int d) throws ProjectException {
         //===== =====
         if (m % 2 == 0) throw new ProjectException("m is not odd: m = " + m);
-        // TODO: code that check and ensures that m = p*q
-        // TODO: code that check and ensures that m = p^n where n >= 2
         if (d < 1) throw new ProjectException("d is not greater than or equal to 1: d = " + d);
         if (d > (m-1)/2) throw new ProjectException("d is not less than or equal to (m-1)/2: d = " + d + ", (m-1)/2 = " + (m-1)/2);
     }
@@ -776,14 +775,13 @@ public class Project {
     }
 
     public static BigInteger factorial(BigInteger n) {
-        if (n.compareTo(BigInteger.ONE) == -1) return BigInteger.ONE;
+        if (n.compareTo(BigInteger.ONE) < 1) return BigInteger.ONE;
         return n.multiply(factorial(n.subtract(BigInteger.ONE)));
     }
 
     public static BigInteger nCr(BigInteger n, BigInteger r) {
         BigInteger numer = factorial(n);
         BigInteger denom = (factorial(r).multiply(factorial(n.subtract(r))));
-        // System.out.println(numer + ", " + denom); //DEBUG
         return numer.divide(denom);
     }
 }
