@@ -34,7 +34,9 @@ public class Project {
 
         // test_all_m_and_d_combinations(49, 49, 15, 15, true, true, false, -1, false);
 
-        test_all_m_and_d_combinations(9, 9, 1, 999, false, true, false, 600, false);
+        test_all_m_and_d_combinations(601, 1000, 2, 2, false, true, false, 600, false);
+        // test_all_m_and_d_combinations(45, 45, 2, 2, false, true, false, 600, false);
+        // test_all_m_and_d_combinations(105, 105, 2, 2, false, true, false, 600, false);
         
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
@@ -62,6 +64,7 @@ public class Project {
         sc.useDelimiter("\r"); // a single enter press is now the separator.
         for (int i = m_start; i <= m_end; ++i) {
             skipToNextM = false;
+            if (i % 3 != 0) continue;   
             for (int j = d_start; j <= (i-1)/2 && j <= d_end; ++j) {
                 FileHelper.deleteAllEmptyFiles(new File(FileHelper.outputsDir)); // delete empty files
                 if (skipToNextM) {
@@ -346,7 +349,7 @@ public class Project {
         System.out.println("given " + redString("m = ", m) + ", " + redString("d = ", d));
         System.out.println("Calculations took " + formattedElapsedTime + ".");
         System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size ", 2*d) + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
-        System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size 1 to ", 2*d) + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
+        // System.out.println("All " + redString("ascending & non-repeating") + " tuple (" + redString("size 1 to ", 2*d) + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
         // System.out.println("            " +"\"reduced\" " + redString("U") + " set: contains " + redString(U_set.size()) + " tuples");
         // System.out.println("            " + "\"reduced\" " + redString("B") + " set: contains " + redString(B_set.size()) + " tuples");
         System.out.println("                      " + redString("V") + " set: contains " + redString(V_set.size()) + " tuples");
@@ -363,7 +366,7 @@ public class Project {
         if (print_outputs) pw.println("Z/mZ:  " + Z_mod_m_Z.toString());
         if (print_outputs) pw.println("Z/mZ*: " + Z_mod_m_Z_star.toString());
         if (print_outputs) pw.println("All ascending & non-repeating tuple (size " + 2*d + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
-        if (print_outputs) pw.println("All ascending & non-repeating tuple (size 1 to " + 2*d + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
+        // if (print_outputs) pw.println("All ascending & non-repeating tuple (size 1 to " + 2*d + ") combinations possible for the U set: " + (new BigInteger("2").pow(Z_mod_m_Z.size()-1).subtract(BigInteger.ONE)));
         // if (print_outputs) pw.println("            " +"\"reduced\" U set: contains " + U_set.size() + " tuples");
         // if (print_outputs) pw.println("            \"reduced\" B set: contains " + B_set.size() + " tuples");
         if (print_outputs) pw.println("                      V set: contains " + V_set.size() + " tuples");
@@ -406,6 +409,7 @@ public class Project {
         if (print_outputs) pw.println("Below are debug outputs for each alpha in V whether it was put in the indecomposable set or the decomposable but no pairs set:");
         if (print_outputs) pw.println(no_pair_print_buffer.toString());
 
+        if ((exceptional_cycles.size()+1) * 3 != m) System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         System.out.println("\nmethod validate_set_V(" + redString(m) + ", " + redString(d) + ") ran to completion.");
         if (print_outputs) pw.println("\nmethod validate_set_V(" + m + ", " + d + ") ran to completion.");
 
