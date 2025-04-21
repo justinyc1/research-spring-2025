@@ -444,6 +444,7 @@ public class Project {
      * @throws IOException 
      */
     public static void find_all_valid_alpha_combinations(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int alpha_length) throws ProjectException, IOException {
+        // original recursive implementation
         int[] this_combination = new int[alpha_length];
         if (validate_split_in_halves) {
             debugOutput = new PrintWriter(new FileWriter("JC_code\\outputs\\" + "debug_output.txt", true));
@@ -452,6 +453,12 @@ public class Project {
         } else {
             recursively_find_all(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
         }
+
+        // new implementation: checking using halves TODO
+        /*
+         * original: (2^n)/2 many operations
+         * new: 2((2^(n/2))/2) many operations (?)
+         */
     }
 
     /** Recursively find all valid ascending combinations of alpha tuple, using the values of Z/mZ (excluding 0)
