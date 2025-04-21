@@ -1,23 +1,5 @@
 package JC_code.javacode; // **remove this if this file is NOT in a folder called 'javacode'
 
-/* TODO: 
- * look into exceptional cycles
- * extract code into methods
- * 
- * Write code that can identify all indecomposable cycles in V^d_m.
- * Generate some data, for example:
- *   Start with m = p, where p is prime, How large can p get before the computation time is too much? Would we get any exceptional cycles? (we shouldn’t?) Are there indecomposable elements? (there shouldn’t be?)
- *   Try m = p^2, where p is prime. (i.e. m = 9). How many exceptional cycles would we see, and for what values of d? Are there any patterns?
- *   Are there patterns if we fix the prime p and consider m = p, p^2, p^3, ...
- * Try to convert the recursive algorithm for finding all d-length ascending-order combinations for the set U^n_m into an iterative algorithm.
- * Think about ways to ’remember’ data to possibly increase efficiency and for data reusability.
- * Try to optimize the code in any reasonable way for better time efficiency.
- * Consider outputting program runtime to keep track of time efficiency as inputs gets larger.
- * Consider trying to identify the time complexity of the algorithms.
- * Explore the second conjecture, possibly writing some code that can test it.
- * Organize the GitHub repository.
- * 
- */
 //===== libraries that are used for this program =====
 import java.util.Set;
 import java.util.TreeSet;
@@ -52,7 +34,7 @@ public class Project {
 
         // test_all_m_and_d_combinations(49, 49, 15, 15, true, true, false, -1, false);
 
-        test_all_m_and_d_combinations(3, 3, 1, 999, false, true, false, 600, false);
+        test_all_m_and_d_combinations(9, 9, 1, 999, false, true, false, 600, false);
         
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
@@ -131,7 +113,6 @@ public class Project {
         long startTime = System.nanoTime();
         startTimeInNano = startTime;
 
-        //TODO: extract this section into a method
         //===== create and put valid values in 'Z/mZ' and 'Z/mZ*' set =====
         Set<Integer> Z_mod_m_Z = new HashSet<>();
         Set<Integer> Z_mod_m_Z_star = new HashSet<>();
@@ -163,11 +144,6 @@ public class Project {
         // int n_halved_plus_one = (n / 2) + 1;
         // System.out.println("n/2 + 1 = " + n_halved_plus_one);//DEBUG
 
-        // TODO: could use regular for loops for slightly faster time (?)
-        // for (Tuple alpha : U_set) {
-        //     put_in_V_set_if_valid(V_set, Z_mod_m_Z_star, alpha, m, n_halved_plus_one);
-        // }
-
         // for (Tuple tuple : B_set) {
         //     // if the tuple is in ascending order, in the range [1, m-1], it is valid tuple for V set
         //     V_set.add(tuple); // every tuple in B set is already in ascending order
@@ -190,7 +166,6 @@ public class Project {
         Set<Tuple> decomposable_but_no_pairs = new HashSet<>(); // contains all tuples from the V set that HAVE SUBSETS & NO PAIRS  adding up to m
         Set<Tuple> exceptional_cycles = new HashSet<>(); // contains all tuples from the V set that are not made up of exclusively pairs
         // TODO: check code for indecomposable; check indecomposable definitions
-        // populate_indecomposable(V_set, indecomposable, m); // TODO: BUG: THIS MAY HAVE CAUSED WRONG indecomposable set VALUES
         
         // TODO: should be a way to make this faster? (actually prob not)
         for (Tuple tuple : V_set) { // for each tuple
@@ -241,8 +216,23 @@ public class Project {
         int min_subset_size = 4;
         int max_subset_size = 2 * d - 2;
 
-        // TODO: what to do with tuple in no pairs when d = 1,2 (d=1 => 2 elements = all pairs, d=2 =>  )
+        // ===== indecomposable set and decomposable but no pairs set =====
+        // when d = 1,2 (d=1 => 2 elements = all pairs, d=2 => both pairs or no pairs)
         // TODO: for d >= 3, check subtuples of 'half size' instead of full size (?)
+        if (d == 2) {
+            for (Tuple alpha : none_are_pairs) {
+                // if the first element have a pair, then the other two numbers are also pairs.
+                if (alpha.get(0) + alpha.get(1) == m || 
+                    alpha.get(0) + alpha.get(2) == m || 
+                    alpha.get(0) + alpha.get(3) == m
+                ) {
+                    continue;
+                }
+                // else there is no pairs in alpha. when d = 2, only alpha_1 and alpha_2 would be pairs. therefore at this point it is indecomposable
+                if (print_outputs) no_pair_print_buffer.append("adding to indecomposable set: " + alpha + "\n");
+                indecomposable.add(alpha);
+            }
+        }
         if (d >= 3) { // when d = 2 or less, alpha have at most 4 elements, so there is no indecomposables nor decomposable but no pairs 
             for (Tuple alpha : none_are_pairs) { // each element is an alpha with no pairs
                 boolean divides_m = false;
@@ -277,13 +267,13 @@ public class Project {
                 if (divides_m) {
                     // System.out.println("adding to decomposable but no pairs set: " + alpha + ", since subtuple = " + subtuple);
                     // if (print_outputs) pw.println("adding to decomposable but no pairs set: " + alpha);
-                    no_pair_print_buffer.append("adding to decomposable but no pairs set: " + alpha + ", since subtuple = " + subtuple + "\n");
+                    if (print_outputs) no_pair_print_buffer.append("adding to decomposable but no pairs set: " + alpha + ", since subtuple = " + subtuple + "\n");
                     decomposable_but_no_pairs.add(alpha);
                     continue;
                 } else {
                     // System.out.println("adding to indecomposable set: " + alpha + ", since subtuple = " + subtuple);
                     // if (print_outputs) pw.println("adding to indecomposable set: " + alpha);
-                    no_pair_print_buffer.append("adding to indecomposable set: " + alpha + "\n");
+                    if (print_outputs) no_pair_print_buffer.append("adding to indecomposable set: " + alpha + "\n");
                     indecomposable.add(alpha);
                     continue;
                 }
@@ -430,7 +420,6 @@ public class Project {
      * @throws ProjectException if m or d is invalid
      */
     public static void validate_m_and_d(int m, int d) throws ProjectException {
-        //===== =====
         if (m % 2 == 0) throw new ProjectException("m is not odd: m = " + m);
         if (d < 1) throw new ProjectException("d is not greater than or equal to 1: d = " + d);
         if (d > (m-1)/2) throw new ProjectException("d is not less than or equal to (m-1)/2: d = " + d + ", (m-1)/2 = " + (m-1)/2);
