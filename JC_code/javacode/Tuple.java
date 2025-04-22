@@ -57,6 +57,10 @@ public class Tuple implements Comparable<Tuple> {
         return elements[index];
     }
 
+    /**
+     * 
+     * @return the sum of the elements
+     */
     public int sum() {
         int sum = 0;
         for (int i = 0; i < elements.length; ++i) {
@@ -106,6 +110,40 @@ public class Tuple implements Comparable<Tuple> {
             return new Tuple(nextTuple);
         }
         return null;
+    }
+
+    /** Create a new Tuple of size = sum of input Tuples. Copy into the new Tuple in O(n) time
+     * 
+     * @param other
+     * @return a new Tuple with the merged contents of the two input Tuples.
+     */
+    public Tuple merge(Tuple other) {
+        Tuple result = new Tuple(this.elements.length + other.elements.length);
+        int size = 0;
+        for (int i = 0; i < this.elements.length; i++, size++) {
+            result.elements[size] = this.elements[i];
+        }
+        for (int i = 0; i < other.elements.length; i++, size++) {
+            result.elements[size] = this.elements[i];
+        }
+        return result;
+    }
+
+    /** Inverse a Tuple by m.
+     *  
+     *  A Tuple is considered inversed when each element is subtracted from m, and is listed in ascending order.
+     * 
+     *  i.e. m = 17, d = 4: (1, 2, 3, 5) -> (17-5, 17-3, 17-2, 17-1) = (12, 14, 15, 16)
+     *  
+     * @return a new Tuple that is inversed by m.
+     */
+    public Tuple inverse(int m) {
+        int n = this.elements.length;
+        Tuple result = new Tuple(n);
+        for (int i = 0; i < n; i++) { // for each element in 'this'
+            result.elements[n-1-i] = m - this.elements[i]; // 
+        }
+        return result;
     }
 
     /**Uses indexOf(), which implements binary search, to check if key exist in Tuple. (Tuple MUST be sorted in non-descending order)

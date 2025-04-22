@@ -23,6 +23,8 @@ public class Project {
     static boolean allowOverwrite = false;
     static boolean validate_split_in_halves = false;
     static int valid_split_in_half_count = 0;
+    static boolean check_tuple_sum = false;
+    static int valid_tuple_sum_count = 0;
     static PrintWriter debugOutput = null;
     public static void main(String[] args) throws ProjectException, IOException {
         // validate_set_V(5, 2);
@@ -32,11 +34,14 @@ public class Project {
         // validate_set_V(27, 4, true);
         // validate_set_V(77, 4, true);
 
-        // test_all_m_and_d_combinations(49, 49, 15, 15, true, true, false, -1, false);
+        // test_all_m_and_d_combinations(49, 49, 15, 15, true, true, false, -1, false, false);
 
-        test_all_m_and_d_combinations(601, 1000, 2, 2, false, true, false, 600, false);
-        // test_all_m_and_d_combinations(45, 45, 2, 2, false, true, false, 600, false);
-        // test_all_m_and_d_combinations(105, 105, 2, 2, false, true, false, 600, false);
+        // test_all_m_and_d_combinations(1246, 1600, 2, 2, false, true, false, -1, false, false);
+        // test_all_m_and_d_combinations(51, 51, 1, 999, false, true, false, -1, false, false);
+        // test_all_m_and_d_combinations(15, 15, 1, 999, false, true, false, -1, false, false);
+
+        // check sum
+        test_all_m_and_d_combinations(1, 999, 1, 999, false, true, false, 30, false, true);
         
 
         // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
@@ -44,21 +49,22 @@ public class Project {
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws IOException {
-        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, false, false, false, -1, false);
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, false, false, false, -1, false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs) throws IOException {
-        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, false, false, -1, false);
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, false, false, -1, false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated) throws IOException {
-        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, automated, false, -1, false);
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, automated, false, -1, false, false);
     }
 
-    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated, boolean overwrite_outputs, int max_seconds_allowed, boolean validate_halves) throws IOException {
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated, boolean overwrite_outputs, int max_seconds_allowed, boolean validate_halves, boolean check_sum) throws IOException {
         allowOverwrite = overwrite_outputs;
         maxSecondsAllowed = max_seconds_allowed;
         validate_split_in_halves = validate_halves;
+        check_tuple_sum = check_sum;
         Scanner sc = new Scanner(System.in);
         if (!automated) System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\r"); // a single enter press is now the separator.
@@ -409,7 +415,7 @@ public class Project {
         if (print_outputs) pw.println("Below are debug outputs for each alpha in V whether it was put in the indecomposable set or the decomposable but no pairs set:");
         if (print_outputs) pw.println(no_pair_print_buffer.toString());
 
-        if ((exceptional_cycles.size()+1) * 3 != m) System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        // if ((exceptional_cycles.size()+1) * 3 != m) System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"); //DEBUG
         System.out.println("\nmethod validate_set_V(" + redString(m) + ", " + redString(d) + ") ran to completion.");
         if (print_outputs) pw.println("\nmethod validate_set_V(" + m + ", " + d + ") ran to completion.");
 
@@ -439,9 +445,9 @@ public class Project {
     public static void find_all_valid_alpha_combinations(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int alpha_length) throws ProjectException, IOException {
         // original recursive implementation
         int[] this_combination = new int[alpha_length];
-        if (validate_split_in_halves) {
+        if (validate_split_in_halves || check_tuple_sum) {
             debugOutput = new PrintWriter(new FileWriter("JC_code\\outputs\\" + "debug_output.txt", true));
-            recursively_find_all_check_halves(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
+            recursively_find_all_check_info(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
             debugOutput.close();
         } else {
             recursively_find_all(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
@@ -449,8 +455,13 @@ public class Project {
 
         // new implementation: checking using halves TODO
         /*
-         * original: (2^n)/2 many operations
-         * new: 2((2^(n/2))/2) many operations (?)
+         * for each possible half tuple of size d in the range [1, (m-1)/2]:
+         *     put it in an array firstHalf
+         *     put in hashmap, where key = sum of hashmap mod m, value = list of 'inversed' tuples. i.e. for m=9,d=2: (1,2) -> (9-2, 9-1) = (7,8), therefore hm.put((7,8), (1,2))
+         *     
+         * 
+         * for each half tuple in firstHalf:
+         *     
          */
     }
 
@@ -494,7 +505,7 @@ public class Project {
         }
     }
 
-    private static void recursively_find_all_check_halves(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int[] this_combination, int sum, int depth, int n_halved_plus_one) throws ProjectException, FileNotFoundException {
+    private static void recursively_find_all_check_info(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int[] this_combination, int sum, int depth, int n_halved_plus_one) throws ProjectException, FileNotFoundException {
         if (depth > this_combination.length) {
             // System.out.println("depth = " + depth + "   returning"); // DEBUG
             return;
@@ -517,10 +528,10 @@ public class Project {
             if (depth == this_combination.length && sum % m == 0) {
                 // V_set.add(new Tuple(this_combination));
                 // validate_split_halves(this_combination, m); // DEBUG
-                put_in_V_set_if_valid_and_check_halves(V_set, ZmmZ_star, this_combination, m, n_halved_plus_one);
+                put_in_V_set_if_valid_and_check_info(V_set, ZmmZ_star, this_combination, m, n_halved_plus_one);
             }
             
-            recursively_find_all_check_halves(V_set, ZmmZ_star, m, this_combination, sum, depth+1, n_halved_plus_one);
+            recursively_find_all_check_info(V_set, ZmmZ_star, m, this_combination, sum, depth+1, n_halved_plus_one);
             
             // System.out.print("subtracting from sum = " + sum + " by last element at index " + depth + "-1 = " + this_combination[depth-1]); // DEBUG
             // sum -= this_combination[depth-1];
@@ -561,7 +572,7 @@ public class Project {
         }
     }
 
-    public static void put_in_V_set_if_valid_and_check_halves(Set<Tuple> V_set, Set<Integer> Z_mod_m_Z_star, int[] alpha, int m, int n_halved_plus_one) throws ProjectException {
+    public static void put_in_V_set_if_valid_and_check_info(Set<Tuple> V_set, Set<Integer> Z_mod_m_Z_star, int[] alpha, int m, int n_halved_plus_one) throws ProjectException {
         if (maxSecondsAllowed > 0) { // has time limit
             terminate_if_longer_than_n_seconds(maxSecondsAllowed);
         }
@@ -588,8 +599,29 @@ public class Project {
         }
         if (this_alpha_is_valid) {
             // B_set.add(alpha);
-            validate_split_halves(alpha, m); // DEBUG
+            if (validate_split_in_halves) validate_split_halves(alpha, m); // DEBUG
+            if (check_tuple_sum) validate_tuple_sum(alpha, m); //
             V_set.add(new Tuple(alpha));
+        }
+    }
+
+    public static void validate_tuple_sum(int[] tuple_array, int m) throws ProjectException {
+        int n = tuple_array.length;
+        int sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += tuple_array[i];
+        }
+        int d = tuple_array.length / 2;
+        int m_times_d = m * d;
+        if (sum == m_times_d) { // normal
+            valid_tuple_sum_count++;
+            if (valid_tuple_sum_count % 1000 == 0) {
+                System.out.println(valid_tuple_sum_count + " tuples checked are valid halves.");
+            }
+        } else { // anomaly
+            System.out.printf("For m = %d, d = %d, the tuple %s with sum %d does not equal m*d = %d, after %d normal combinations in a row.\n", m, tuple_array.length, toString(tuple_array), sum, m_times_d, valid_tuple_sum_count);
+            debugOutput.append(String.format("\nFor m = %d, d = %d, the tuple in U set %s with sum %d does not equal m*d = %d, after %d normal combinations in a row.\n", m, tuple_array.length, toString(tuple_array), sum, m_times_d, valid_tuple_sum_count));
+            valid_tuple_sum_count = 0;
         }
     }
 
