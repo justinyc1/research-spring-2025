@@ -27,25 +27,11 @@ public class Project {
     static int valid_tuple_sum_count = 0;
     static PrintWriter debugOutput = null;
     public static void main(String[] args) throws ProjectException, IOException {
-        // validate_set_V(5, 2);
-        // validate_set_V(45, 4);
-        // validate_set_V(69, 4);
-        
-        // validate_set_V(27, 4, true);
-        // validate_set_V(77, 4, true);
-
-        // test_all_m_and_d_combinations(49, 49, 15, 15, true, true, false, -1, false, false);
-
         // test_all_m_and_d_combinations(1246, 1600, 2, 2, false, true, false, -1, false, false);
         // test_all_m_and_d_combinations(51, 51, 1, 999, false, true, false, -1, false, false);
         // test_all_m_and_d_combinations(15, 15, 1, 999, false, true, false, -1, false, false);
 
-        // check sum
-        test_all_m_and_d_combinations(1, 999, 1, 999, false, true, false, 30, false, true);
-        
-
-        // Tuple myTuple1 = new Tuple(new int[] {1,2,3,4,5,6,7,8,9});
-        // for (int i = 0; i < myTuple1.size(); i++) { System.out.println("index of " + i + " is " + myTuple1.indexOf(i)); }
+        test_all_m_and_d_combinations(1, 165, 1, 2, true, true, true, -1, false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws IOException {
@@ -70,7 +56,7 @@ public class Project {
         sc.useDelimiter("\r"); // a single enter press is now the separator.
         for (int i = m_start; i <= m_end; ++i) {
             skipToNextM = false;
-            if (i % 3 != 0) continue;   
+            // if (i % 3 != 0) continue; //DEBUG m=3q
             for (int j = d_start; j <= (i-1)/2 && j <= d_end; ++j) {
                 FileHelper.deleteAllEmptyFiles(new File(FileHelper.outputsDir)); // delete empty files
                 if (skipToNextM) {
@@ -335,14 +321,14 @@ public class Project {
         // System.out.println();
         // System.out.println("Print " + redString("some") + "_are_pairs" + " (contains " + redString(some_are_pairs.size()) + " tuples): " + some_are_pairs); //DEBUG
         
-        // System.out.println();
-        // System.out.println("Print " + redString("none") + "_are_pairs" + " (contains " + redString(none_are_pairs.size()) + " tuples): " + none_are_pairs); //DEBUG
+        System.out.println();
+        System.out.println("Print " + redString("none") + "_are_pairs" + " (contains " + redString(none_are_pairs.size()) + " tuples): " + none_are_pairs); //DEBUG
         
-        // System.out.println();
-        // System.out.println("Print " + redString("indecomposable") + " (contains " + redString(indecomposable.size()) + " tuples): " + indecomposable); //DEBUG
+        System.out.println();
+        System.out.println("Print " + redString("indecomposable") + " (contains " + redString(indecomposable.size()) + " tuples): " + indecomposable); //DEBUG
         
-        // System.out.println();
-        // System.out.println("Print " + redString("decomposable but no pairs") + " (contains " + redString(decomposable_but_no_pairs.size()) + " tuples): " + decomposable_but_no_pairs); //DEBUG
+        System.out.println();
+        System.out.println("Print " + redString("decomposable but no pairs") + " (contains " + redString(decomposable_but_no_pairs.size()) + " tuples): " + decomposable_but_no_pairs); //DEBUG
         
         // System.out.println();
         // System.out.println("Print " + redString("exceptional") + " cycles (contains " + redString(exceptional_cycles.size()) + " tuples): " + exceptional_cycles); //DEBUG

@@ -2,11 +2,10 @@ Running method validate_set_V(m = 17, d = 1):
 
 Summary:
 given m = 17, d = 1
-Calculations took 0 days, 0 hours, 0 minutes, 0 seconds, 0 miliseconds, 30 microseconds, 300 nanoseconds.
+Calculations took 0 days, 0 hours, 0 minutes, 0 seconds, 0 miliseconds, 128 microseconds, 299 nanoseconds.
 Z/mZ:  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 Z/mZ*: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 All ascending & non-repeating tuple (size 2) combinations possible for the U set: 120
-All ascending & non-repeating tuple (size 1 to 2) combinations possible for the U set: 65535
                       V set: contains 8 tuples
           all_are_pairs set: contains 8 tuples
          some_are_pairs set: contains 0 tuples
@@ -16,24 +15,24 @@ decomposable & no pairs set: contains 0 tuples
      exceptional_cycles set: contains 0 tuples
 
 Print V set (contains 8 tuples): {
+(7, 10)
+(2, 15)
 (6, 11)
-(4, 13)
 (1, 16)
 (5, 12)
-(3, 14)
 (8, 9)
-(2, 15)
-(7, 10)}
+(4, 13)
+(3, 14)}
 
 Print all_are_pairs (contains 8 tuples): {
+(7, 10)
+(2, 15)
 (6, 11)
-(4, 13)
 (1, 16)
 (5, 12)
-(3, 14)
 (8, 9)
-(2, 15)
-(7, 10)}
+(4, 13)
+(3, 14)}
 
 Print some_are_pairs (contains 0 tuples): {}
 
