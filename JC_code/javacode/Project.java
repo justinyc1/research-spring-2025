@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 public class Project {
     static long startTimeInNano = -1;
@@ -31,7 +32,7 @@ public class Project {
         // test_all_m_and_d_combinations(51, 51, 1, 999, false, true, false, -1, false, false);
         // test_all_m_and_d_combinations(15, 15, 1, 999, false, true, false, -1, false, false);
 
-        test_all_m_and_d_combinations(1, 165, 1, 2, true, true, true, -1, false, false);
+        test_all_m_and_d_combinations(95, 95, 4, 4, true, true, true, -1, false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws IOException {
@@ -93,12 +94,13 @@ public class Project {
 
         String filepath = "JC_code\\outputs\\";
         
-        String filename = "output_for_m_" + m + "_d_" + d + ".txt";
+        // String filename = "output_for_m_" + m + "_d_" + d + ".txt";//TODO REVERT
+        String filename = "test2.txt";//TODO REVERT
         File currentFile = new File(filepath + filename);
         if (print_outputs && !allowOverwrite && currentFile.exists() && !currentFile.isDirectory()) {
             throw new ProjectException("overwrite_outputs disabled and printing to file enabled, while file for m = " + m + ", d = " + d + " already exists.");
         }
-        PrintWriter pw = new PrintWriter(filepath + "test.txt");
+        PrintWriter pw = new PrintWriter(filepath + "test2.txt");//TODO REVERT
         if (print_outputs) {
             pw = new PrintWriter(currentFile);
         }
@@ -376,7 +378,7 @@ public class Project {
         // if (print_outputs) pw.println("Print \"reduced\" B set (contains " + B_set.size() + " tuples): " + toString(B_set, "\n")); //DEBUG
 
         if (print_outputs) pw.println();
-        if (print_outputs) pw.println("Print V set (contains " + V_set.size() + " tuples): " + toString(V_set, "\n")); //DEBUG
+        if (print_outputs) pw.println("Print V set (contains " + V_set.size() + " tuples): " + toStringSorted(V_set, "\n")); //DEBUG
 
         if (print_outputs) pw.println();
         if (print_outputs) pw.println("Print all_are_pairs (contains " + all_are_pairs.size() + " tuples): " + toString(all_are_pairs, "\n")); //DEBUG
@@ -436,19 +438,97 @@ public class Project {
             recursively_find_all_check_info(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
             debugOutput.close();
         } else {
-            recursively_find_all(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
+            // find_all_recursively(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);//TODO REVERT
+            find_all_using_halves(V_set, ZmmZ_star, m, alpha_length, (alpha_length-2)/2+1);//TODO REVERT
         }
 
         // new implementation: checking using halves TODO
         /*
          * for each possible half tuple of size d in the range [1, (m-1)/2]:
          *     put it in an array firstHalf
-         *     put in hashmap, where key = sum of hashmap mod m, value = list of 'inversed' tuples. i.e. for m=9,d=2: (1,2) -> (9-2, 9-1) = (7,8), therefore hm.put((7,8), (1,2))
-         *     
+         *     put in hashmap: key = 'inversed' tuple sum, value = list of 'inversed' tuples. i.e. for m=9,d=2: (1,2) -> (9-2, 9-1) = (7,8), therefore hm.put(15, hm.get(15).add((1,2)))
          * 
          * for each half tuple in firstHalf:
-         *     
+         *     get the 'inversed' tuples sum
+         *     for each 'inversed' tuple in hashmap where key = 'inversed' tuple sum:
+         *         if there are no overlapping numbers
+         *             put it in V set
          */
+    }
+
+    private static void find_all_using_halves(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int alpha_length, int n_halved_plus_one) throws ProjectException, IOException {
+        int d = alpha_length/2;
+        int m_minus_one_divided_by_two = (m-1)/2;
+        int m_times_d = m * d;
+        ArrayList<Tuple> firstHalves = new ArrayList<>();
+        HashMap<Integer, ArrayList<Tuple>> inversed_sum_tuples_map = new HashMap<>();
+        int[] this_combination = new int[d];
+        find_halves_recursively(firstHalves, inversed_sum_tuples_map, m, m_minus_one_divided_by_two, this_combination, 0, 1);
+        
+        PrintWriter pwTesting = new PrintWriter("JC_code\\outputs\\testing.txt");
+        // for (int i = 0; i < firstHalves.size(); i++) { // firstHalves
+        //     pwTesting.println(firstHalves.get(i) + " with sum = " + firstHalves.get(i).sum());
+        // }
+        // for (int sum_key : inversed_sum_tuples_map.keySet()) {
+        //     pwTesting.println("inversed sum = " + sum_key);
+        //     for (Tuple alpha : inversed_sum_tuples_map.get(sum_key)) {
+        //         pwTesting.println(alpha);
+        //     }
+        // }
+        
+        for (int i = 0; i < firstHalves.size(); i++) {
+            Tuple curr = firstHalves.get(i);
+            int sum = curr.sum();
+            if (!inversed_sum_tuples_map.containsKey(sum)) {
+                pwTesting.println("HASHMAP DOES NOT CONTAIN INVERSED SUM = " + sum + " !!!");
+                continue;
+            }
+            int left = curr.get(curr.size()-1);
+            for (Tuple alpha : inversed_sum_tuples_map.get(sum)) {
+                if (left == alpha.get(alpha.size()-1)) {
+                    pwTesting.println("END OF FIRST HALF = START OF SECOND HALF ???");
+                    continue;
+                }
+                put_in_V_set_if_valid(V_set, ZmmZ_star, curr.merge(alpha), m, n_halved_plus_one);
+            }
+        }
+
+        // for (int sum_key : inversed_sum_tuples_map.keySet()) {
+        //     pwTesting.println("inversed sum = " + sum_key);
+        //     for (Tuple alpha : inversed_sum_tuples_map.get(sum_key)) {
+        //         pwTesting.println(alpha);
+        //     }
+        // }
+
+        pwTesting.close();
+    }
+
+    private static void find_halves_recursively(ArrayList<Tuple> firstHalves, HashMap<Integer, ArrayList<Tuple>> inversed_sum_tuples_map, int m, int m_minus_one_divided_by_two, int[] this_combination, int sum, int depth) {
+        if (depth > this_combination.length) {
+            return;
+        }
+        
+        int prev = 0;
+        if (depth > 1) prev = this_combination[depth-2];
+        for (int i = Integer.max(depth, prev + 1); i <= m_minus_one_divided_by_two - this_combination.length + depth; ++i) {
+            this_combination[depth-1] = i;
+            sum += i;
+
+            if (depth == this_combination.length) {
+                Tuple this_tuple = new Tuple(this_combination);
+                firstHalves.add(this_tuple);
+
+                if (!inversed_sum_tuples_map.containsKey(sum)) {
+                    ArrayList<Tuple> emptyList = new ArrayList<>();
+                    inversed_sum_tuples_map.put(sum, emptyList);
+                }
+                inversed_sum_tuples_map.get(sum).add(this_tuple.inverse(m));
+            }
+            
+            find_halves_recursively(firstHalves, inversed_sum_tuples_map, m, m_minus_one_divided_by_two, this_combination, sum, depth+1);
+            
+            sum -= i;
+        }
     }
 
     /** Recursively find all valid ascending combinations of alpha tuple, using the values of Z/mZ (excluding 0)
@@ -459,7 +539,7 @@ public class Project {
      * @param sum - stores the sum of the elements in this_combination
      * @param depth - the current level of the recursion method
      */
-    private static void recursively_find_all(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int[] this_combination, int sum, int depth, int n_halved_plus_one) throws ProjectException {
+    private static void find_all_recursively(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int[] this_combination, int sum, int depth, int n_halved_plus_one) throws ProjectException {
         if (depth > this_combination.length) {
             // System.out.println("depth = " + depth + "   returning"); // DEBUG
             return;
@@ -481,7 +561,7 @@ public class Project {
                 put_in_V_set_if_valid(V_set, ZmmZ_star, this_combination, m, n_halved_plus_one);
             }
             
-            recursively_find_all(V_set, ZmmZ_star, m, this_combination, sum, depth+1, n_halved_plus_one);
+            find_all_recursively(V_set, ZmmZ_star, m, this_combination, sum, depth+1, n_halved_plus_one);
             
             // System.out.print("subtracting from sum = " + sum + " by last element at index " + depth + "-1 = " + this_combination[depth-1]); // DEBUG
             // sum -= this_combination[depth-1];
@@ -493,37 +573,21 @@ public class Project {
 
     private static void recursively_find_all_check_info(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int[] this_combination, int sum, int depth, int n_halved_plus_one) throws ProjectException, FileNotFoundException {
         if (depth > this_combination.length) {
-            // System.out.println("depth = " + depth + "   returning"); // DEBUG
             return;
         }
         
         int prev = 0;
         if (depth > 1) prev = this_combination[depth-2];
-        // System.out.println("for comb " + toString(this_combination) + " the prev is " + prev); // DEBUG
         for (int i = Integer.max(depth, prev + 1); i <= m - 1 - this_combination.length + depth; ++i) {
-            // if (depth == 1) System.out.println((this_combination[0]+1) + " out of " + (m-this_combination.length)); // DEBUG 
             this_combination[depth-1] = i;
             sum += i;
 
-            // debugOutput.println(depth + " " + toString(this_combination));
-            // System.out.println(depth + " " + toString(this_combination));
-    
-            // System.out.println(toString(this_combination, depth) + "   depth = " + depth + "   sum: " + sum); // DEBUG
-
-            // if (this_combination.size() == alpha_length) System.out.println(this_combination.toString() + "   sum: " + sum); //DEBUG
             if (depth == this_combination.length && sum % m == 0) {
-                // V_set.add(new Tuple(this_combination));
-                // validate_split_halves(this_combination, m); // DEBUG
                 put_in_V_set_if_valid_and_check_info(V_set, ZmmZ_star, this_combination, m, n_halved_plus_one);
             }
             
             recursively_find_all_check_info(V_set, ZmmZ_star, m, this_combination, sum, depth+1, n_halved_plus_one);
-            
-            // System.out.print("subtracting from sum = " + sum + " by last element at index " + depth + "-1 = " + this_combination[depth-1]); // DEBUG
-            // sum -= this_combination[depth-1];
             sum -= i;
-            // System.out.println("   sum is now = " + sum); // DEBUG
-            // this_combination[depth-1] = 0; // dont need to be removed, but could get garbage values based on implementation
         }
     }
 
@@ -555,6 +619,37 @@ public class Project {
         if (this_alpha_is_valid) {
             // B_set.add(alpha);
             V_set.add(new Tuple(alpha));
+        }
+    }
+
+    public static void put_in_V_set_if_valid(Set<Tuple> V_set, Set<Integer> Z_mod_m_Z_star, Tuple alpha, int m, int n_halved_plus_one) throws ProjectException {
+        if (maxSecondsAllowed > 0) { // has time limit
+            terminate_if_longer_than_n_seconds(maxSecondsAllowed);
+        }
+        boolean this_alpha_is_valid = true;
+        // System.out.println(n_halved_plus_one);
+        for (int t : Z_mod_m_Z_star) {
+
+            List<Integer> t_times_alpha_reduced_elements = new ArrayList<>();
+            double t_times_alpha_reduced_sum = 0;
+
+            for (int i = 0; i < alpha.size(); ++i) {
+                int reduced_mod_m = (t * alpha.get(i)) % m;
+                t_times_alpha_reduced_elements.add(reduced_mod_m);
+                t_times_alpha_reduced_sum += reduced_mod_m;
+            }
+            t_times_alpha_reduced_sum /= m;
+
+            // System.out.println("for tuple " + alpha + " and t = " + t + ", t*a = " + t_times_alpha_reduced_elements + " and |t*a| = " + t_times_alpha_reduced_sum);//DEBUG
+            // System.out.printf("for tuple %-16s and t = %2d, t*a = %-16s and |t*a| = %1.0f\n", alpha.toString(), t, t_times_alpha_reduced_elements.toString(), t_times_alpha_reduced_sum);//DEBUG
+            if (t_times_alpha_reduced_sum != n_halved_plus_one) {
+                this_alpha_is_valid = false;
+                break; // if |t * alpha| != n/2 +1 for just one t, this alpha tuple is not valid for the B set
+            }
+        }
+        if (this_alpha_is_valid) {
+            // B_set.add(alpha);
+            V_set.add(alpha);
         }
     }
 
@@ -592,11 +687,7 @@ public class Project {
     }
 
     public static void validate_tuple_sum(int[] tuple_array, int m) throws ProjectException {
-        int n = tuple_array.length;
-        int sum = 0;
-        for (int i = 0; i < n; i++) {
-            sum += tuple_array[i];
-        }
+        int sum = sumOf(tuple_array);
         int d = tuple_array.length / 2;
         int m_times_d = m * d;
         if (sum == m_times_d) { // normal
@@ -753,6 +844,14 @@ public class Project {
         int sum = 0;
         for (int i = 0; i < list.size(); ++i) {
             sum += list.get(i);
+        }
+        return sum;
+    }
+
+    public static int sumOf(int[] arr) {
+        int sum = 0;
+        for (int i = 0; i < arr.length; i++) {
+            sum += arr[i];
         }
         return sum;
     }

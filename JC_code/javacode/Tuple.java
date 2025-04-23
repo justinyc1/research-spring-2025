@@ -124,7 +124,7 @@ public class Tuple implements Comparable<Tuple> {
             result.elements[size] = this.elements[i];
         }
         for (int i = 0; i < other.elements.length; i++, size++) {
-            result.elements[size] = this.elements[i];
+            result.elements[size] = other.elements[i];
         }
         return result;
     }
