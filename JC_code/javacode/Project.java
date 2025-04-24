@@ -22,34 +22,36 @@ public class Project {
     static int maxSecondsAllowed = -1;
     static boolean skipToNextM = false;
     static boolean allowOverwrite = false;
+    static String generateMethod = ""; // "recursion", "halves"
     static boolean validate_split_in_halves = false;
     static int valid_split_in_half_count = 0;
     static boolean check_tuple_sum = false;
     static int valid_tuple_sum_count = 0;
     static PrintWriter debugOutput = null;
     public static void main(String[] args) throws ProjectException, IOException {
-        // test_all_m_and_d_combinations(1246, 1600, 2, 2, false, true, false, -1, false, false);
-        // test_all_m_and_d_combinations(51, 51, 1, 999, false, true, false, -1, false, false);
-        // test_all_m_and_d_combinations(15, 15, 1, 999, false, true, false, -1, false, false);
+        // test_all_m_and_d_combinations(1246, 1600, 2, 2, false, true, false, -1, "halves", false, false);
+        // test_all_m_and_d_combinations(51, 51, 1, 999, false, true, false, -1, "halves", false, false);
+        test_all_m_and_d_combinations(51, 51, 1, 999, false, true, false, -1, "halves", false, false);
 
-        test_all_m_and_d_combinations(95, 95, 4, 4, true, true, true, -1, false, false);
+        // test_all_m_and_d_combinations(1500, 1600, 2, 2, true, true, true, -1, "halves", false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end) throws IOException {
-        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, false, false, false, -1, false, false);
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, false, false, false, -1, "halves", false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs) throws IOException {
-        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, false, false, -1, false, false);
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, false, false, -1, "halves", false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated) throws IOException {
-        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, automated, false, -1, false, false);
+        test_all_m_and_d_combinations(m_start, m_end, d_start, d_end, print_outputs, automated, false, -1, "halves", false, false);
     }
 
-    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated, boolean overwrite_outputs, int max_seconds_allowed, boolean validate_halves, boolean check_sum) throws IOException {
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated, boolean overwrite_outputs, int max_seconds_allowed, String generate_method, boolean validate_halves, boolean check_sum) throws IOException {
         allowOverwrite = overwrite_outputs;
         maxSecondsAllowed = max_seconds_allowed;
+        generateMethod = generate_method;
         validate_split_in_halves = validate_halves;
         check_tuple_sum = check_sum;
         Scanner sc = new Scanner(System.in);
@@ -88,7 +90,7 @@ public class Project {
      * @param d - An positive integer in the range: 1 <= d <= (m-1)/2
      */
     public static void validate_set_V(int m, int d, boolean print_outputs) throws ProjectException, IOException {
-        System.out.println("Running method validate_set_V(" + redString("m = ", m) + ", " + redString("d = ", d) + "):\n");
+        System.out.println("Running method validate_set_V(" + redString("m = ", m) + ", " + redString("d = ", d) + ") and generating using " + generateMethod + ":\n");
         
         validate_m_and_d(m, d);
 
@@ -105,7 +107,7 @@ public class Project {
             pw = new PrintWriter(currentFile);
         }
 
-        if (print_outputs) pw.println("Running method validate_set_V(m = " + m + ", d = " + d + "):\n");
+        if (print_outputs) pw.println("Running method validate_set_V(m = " + m + ", d = " + d + ") and generating using " + generateMethod + ":\n");
 
         long startTime = System.nanoTime();
         startTimeInNano = startTime;
@@ -323,14 +325,14 @@ public class Project {
         // System.out.println();
         // System.out.println("Print " + redString("some") + "_are_pairs" + " (contains " + redString(some_are_pairs.size()) + " tuples): " + some_are_pairs); //DEBUG
         
-        System.out.println();
-        System.out.println("Print " + redString("none") + "_are_pairs" + " (contains " + redString(none_are_pairs.size()) + " tuples): " + none_are_pairs); //DEBUG
+        // System.out.println();
+        // System.out.println("Print " + redString("none") + "_are_pairs" + " (contains " + redString(none_are_pairs.size()) + " tuples): " + none_are_pairs); //DEBUG
         
-        System.out.println();
-        System.out.println("Print " + redString("indecomposable") + " (contains " + redString(indecomposable.size()) + " tuples): " + indecomposable); //DEBUG
+        // System.out.println();
+        // System.out.println("Print " + redString("indecomposable") + " (contains " + redString(indecomposable.size()) + " tuples): " + indecomposable); //DEBUG
         
-        System.out.println();
-        System.out.println("Print " + redString("decomposable but no pairs") + " (contains " + redString(decomposable_but_no_pairs.size()) + " tuples): " + decomposable_but_no_pairs); //DEBUG
+        // System.out.println();
+        // System.out.println("Print " + redString("decomposable but no pairs") + " (contains " + redString(decomposable_but_no_pairs.size()) + " tuples): " + decomposable_but_no_pairs); //DEBUG
         
         // System.out.println();
         // System.out.println("Print " + redString("exceptional") + " cycles (contains " + redString(exceptional_cycles.size()) + " tuples): " + exceptional_cycles); //DEBUG
@@ -438,8 +440,13 @@ public class Project {
             recursively_find_all_check_info(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
             debugOutput.close();
         } else {
-            // find_all_recursively(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);//TODO REVERT
-            find_all_using_halves(V_set, ZmmZ_star, m, alpha_length, (alpha_length-2)/2+1);//TODO REVERT
+            if (generateMethod == "recursion") {
+                find_all_recursively(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
+            } else if (generateMethod == "halves") {
+                find_all_using_halves(V_set, ZmmZ_star, m, alpha_length, (alpha_length-2)/2+1);
+            } else { // default: generate using halves
+                find_all_using_halves(V_set, ZmmZ_star, m, alpha_length, (alpha_length-2)/2+1);
+            }
         }
 
         // new implementation: checking using halves TODO
@@ -459,9 +466,10 @@ public class Project {
     private static void find_all_using_halves(Set<Tuple> V_set, Set<Integer> ZmmZ_star, int m, int alpha_length, int n_halved_plus_one) throws ProjectException, IOException {
         int d = alpha_length/2;
         int m_minus_one_divided_by_two = (m-1)/2;
-        int m_times_d = m * d;
-        ArrayList<Tuple> firstHalves = new ArrayList<>();
-        HashMap<Integer, ArrayList<Tuple>> inversed_sum_tuples_map = new HashMap<>();
+        int m_choose_d = Integer.valueOf(nCr(BigInteger.valueOf(m), BigInteger.valueOf(d)).toString());
+        int hold = 100;
+        ArrayList<Tuple> firstHalves = new ArrayList<>(hold);
+        HashMap<Integer, ArrayList<Tuple>> inversed_sum_tuples_map = new HashMap<>(hold);
         int[] this_combination = new int[d];
         find_halves_recursively(firstHalves, inversed_sum_tuples_map, m, m_minus_one_divided_by_two, this_combination, 0, 1);
         
@@ -475,7 +483,7 @@ public class Project {
         //         pwTesting.println(alpha);
         //     }
         // }
-        
+        pwTesting.println(firstHalves.size() + " " + inversed_sum_tuples_map.size());
         for (int i = 0; i < firstHalves.size(); i++) {
             Tuple curr = firstHalves.get(i);
             int sum = curr.sum();
@@ -492,7 +500,7 @@ public class Project {
                 put_in_V_set_if_valid(V_set, ZmmZ_star, curr.merge(alpha), m, n_halved_plus_one);
             }
         }
-
+        pwTesting.println(V_set.size());
         // for (int sum_key : inversed_sum_tuples_map.keySet()) {
         //     pwTesting.println("inversed sum = " + sum_key);
         //     for (Tuple alpha : inversed_sum_tuples_map.get(sum_key)) {
