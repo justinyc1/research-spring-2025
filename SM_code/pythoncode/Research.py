@@ -1,16 +1,21 @@
 """
 author -- Sabeeha Malikah
-date -- 3/16/25
-Description -- Post Meeting on 3/10/25
+date -- 3/23/25
+Description -- Post Meeting on 3/17/25
     Changes:
-        - tuples must sum to m*d to be part of the U set (previously we checked summing to 0 (mod m))
-        - Generate length d tuples implementing the reverse tuple idea.
+    - using product function from itertools library to compute cartesian product of half_tuples_list
+      and reverse_half_tuples_list instead of using a nested for-loop
+    - using multiprocessing library to speed up verify_v_property() function
 """
 
 # IMPORTS:
+import time
 import math
 import os
 from itertools import combinations
+from itertools import product
+from multiprocessing import Pool
+
 
 """
 This function computes the z mod m z star set given an m value. This set contains integers ranging from [1,m).
@@ -59,23 +64,80 @@ def v_set(m, d, z_star):
     half_tuples_list = []
     reverse_half_tuples_list = []
     v_list = []
-    print("These are the half tuple(s) in the U set: ")
+    print("These are the half tuple(s) in the V set: ")
     for combo in combinations(range(1, ((m-1)//2)+1), d):
         half_tuples_list.append(combo)
         reverse_half_tuples_list.append(tuple(m-alpha for alpha in reversed(combo)))
         print(combo)
         count += 1
+    print(len(half_tuples_list))
 
-
+    # this creates a list containing tuples that represent the parameters sent to verify_v_property() for each i
+    params = product(half_tuples_list, reverse_half_tuples_list, [m], [d], [z_star])
+    # using multiprocessing for more efficiency
+    with Pool() as pool:
+        results = pool.starmap(verify_v_property, params)
     print("These are the tuple(s) in the V set: ")
-    for half_tuple in half_tuples_list:
-        i = 0
-        while i < len(reverse_half_tuples_list):
-            if sum(half_tuple) + sum(reverse_half_tuples_list[i]) == m*d:
-                if verify_v_property(half_tuple, reverse_half_tuples_list[i], m, d, z_star):
-                    print(half_tuple+reverse_half_tuples_list[i])
-                    v_list.append(half_tuple+reverse_half_tuples_list[i])
-            i+=1
+    for result in results:
+        bool_result, new_tuple = result
+        if bool_result:
+            print(new_tuple)
+            v_list.append(new_tuple)
+
+    # for param in params:
+    #     bool_result, new_tuple = verify_v_property(param[0], param[1], param[2], param[3], param[4])
+    #     if bool_result:
+    #         print(new_tuple)
+    #         v_list.append(new_tuple)
+
+
+    # for half_tuple in half_tuples_list:
+    #     params1.append((half_tuple, reverse_half_tuples_list))
+    # with Pool() as pool1:
+    #     results1 = pool1.starmap(combine_tuples, [(ht, reverse_half_tuples_list) for ht in half_tuples_list])
+    #     # for half_tuple in half_tuples_list:
+    #     #     results1 = pool1.starmap(combine_tuples, params1)
+    #
+    # for result in results1:
+    #     for new_tuple in result:
+    #         params2.append((new_tuple[0], new_tuple[1], m, d, z_star))
+
+    # params = []
+    # for half_tuple in half_tuples_list:
+    #     for reverse_tuple in reverse_half_tuples_list:
+    #         params.append((half_tuple, reverse_tuple, m, d, z_star))
+
+
+    #
+
+    print("The number of tuple(s) is ", len(v_list))
+    print()
+    return v_list
+
+
+# def v_set(m, d, z_star):
+#     count = 0
+#     half_tuples_list = []
+#     reverse_half_tuples_list = []
+#     v_list = []
+#     print("These are the half tuple(s) in the U set: ")
+#     for combo in combinations(range(1, ((m-1)//2)+1), d):
+#         half_tuples_list.append(combo)
+#         reverse_half_tuples_list.append(tuple(m-alpha for alpha in reversed(combo)))
+#         print(combo)
+#         count += 1
+#
+#
+#     print("These are the tuple(s) in the V set: ")
+#     for half_tuple in half_tuples_list:
+#         i = 0
+#         while i < len(reverse_half_tuples_list):
+#             if sum(half_tuple) + sum(reverse_half_tuples_list[i]) == m*d:
+#                 if verify_v_property(half_tuple, reverse_half_tuples_list[i], m, d, z_star):
+#                     if verify_not_all_pairs(half_tuple, reverse_half_tuples_list[i], m, d):
+#                         print(half_tuple+reverse_half_tuples_list[i])
+#                         v_list.append(half_tuple+reverse_half_tuples_list[i])
+#             i+=1
 
     # ATTEMPT 1
     # for half_tuple in half_tuples_list:
@@ -98,9 +160,9 @@ def v_set(m, d, z_star):
     #                 v_list.append(half_tuples_list[i] + new_tuple)
     # print("These are the tuple(s) in the V set: ")
     # print(tuple_list)
-    print("The number of tuple(s) is ", len(v_list))
-    print()
-    return v_list
+    # print("The number of tuple(s) is ", len(v_list))
+    # print()
+    # return v_list
 
 """
 This function verifies whether a tuples meets the conditions necessary to be part of the V set.
@@ -118,6 +180,22 @@ OUTPUT:
 
 """
 
+# def verify_not_all_pairs(tuple_1, tuple_2, m, d):
+#     i = 0
+#     j = d-1
+#     pair_count = 0
+#     while i < d and j > -1:
+#         if tuple_1[i] + tuple_2[j] == m:
+#             pair_count += 1
+#         i += 1
+#         j -= 1
+#
+#     if pair_count == d:
+#         return False
+#     return True
+def combine_tuples(half_tuple, reverse_half_tuples_list):
+    return [(half_tuple, reverse_tuple) for reverse_tuple in reverse_half_tuples_list]
+
 
 def verify_v_property(half_tuple_one, half_tuple_two, m, d, z_star):
     t_count = 0
@@ -131,8 +209,8 @@ def verify_v_property(half_tuple_one, half_tuple_two, m, d, z_star):
         if (sum / m) == d:
             t_count = t_count + 1
     if t_count == len(z_star):
-        return True
-    return False
+        return True, new_tuple
+    return False, new_tuple
 
 
 """
@@ -213,8 +291,9 @@ def indecomposable(m, d, no_pairs):
 
 
 def main():
-    m = 11**2
+    m = 7**2
     for d in range(1, ((m-1)//2)+1):
+        start_time = time.time()
         save_path = r'C:\Users\sabee\PycharmProjects\research-spring-2025\SM_code\output'
         filename = f"m_{m}_d_{d}_output.txt"
         full_path = os.path.join(save_path, filename)
@@ -227,10 +306,12 @@ def main():
         v_tuple_list = v_set(m, d, z_star)
         e_tuple_list, no_pairs = e_set(m, v_tuple_list)
         indecomposable_list = indecomposable(m, d, no_pairs)
+        end_time = time.time() - start_time
 
         # print summary & tuples
         with open(full_path, "a") as file:
             # printing summary
+            file.write(f"The program took {end_time} seconds to complete.\n")
             file.write(f"The number of tuple(s) in the V set is: {len(v_tuple_list)}\n")
             file.write(f"The number of tuple(s) in the E set is: {len(e_tuple_list)}\n")
             file.write(f"The number of tuple(s) with no pairs is: {len(no_pairs)}\n")
@@ -254,7 +335,7 @@ def main():
                 file.write(f"{x}\n")
             file.write(f"The number of indecomposable tuple(s) is: {len(indecomposable_list)}\n")
 
-
-main()
+if __name__ == "__main__":
+    main()
 
 

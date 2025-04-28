@@ -84,7 +84,7 @@ def v_set(m, d, z_star):
             i += 1
     # print("These are the tuple(s) in the V set: ")
     # print(tuple_list)
-    print("The number of tuple(s) is ", len(v_list))
+    print("The number of tuple(s) is", len(v_list))
     print()
     return v_list
 
@@ -167,14 +167,17 @@ def e_set(m, v_list):
         else:
             some_pairs.append(v_tuple)
     print("These are the tuple(s) in the E set: ")
-    print(tuple_list)
-    print("The number of tuple(s) is ", count)
+    for e_tuple in tuple_list:
+        print(e_tuple)
+    print("The number of tuple(s) is", count)
     print("These tuples have no pairs that add to m =", m, )
-    print(no_pairs)
-    print("The number of tuple(s) is ", len(no_pairs))
+    for no_pairs_tuple in no_pairs:
+        print(no_pairs_tuple)
+    print("The number of tuple(s) is", len(no_pairs))
     print("These tuples have some (but not all) pairs that add to m =", m, )
-    print(some_pairs)
-    print("The number of tuple(s) is ", len(some_pairs))
+    for some_pairs_tuple in some_pairs:
+        print(some_pairs_tuple)
+    print("The number of tuple(s) is", len(some_pairs))
     print()
     return tuple_list, no_pairs
 
@@ -205,14 +208,24 @@ def indecomposable(m, d, no_pairs):
                         break
 
     print("These are the exceptional tuple(s) that are indecomposable: ")
-    print(tuple_list)
-    print("The number of tuple(s) is ", len(tuple_list))
+    for ind_tuple in tuple_list:
+        print(ind_tuple)
+    print("The number of tuple(s) is", len(tuple_list))
     return tuple_list
 
 
 def main():
-    m = 3*11
-    for d in range(((m-1)//2)+1, 6, -1):
+    # Create a list of primes. This will be useful to loop through.
+    list_of_primes = []
+    primes_file = open(r'C:\Users\sabee\PycharmProjects\research-spring-2025\SM_code\primes.txt', "r")
+    for prime in primes_file:
+        list_of_primes.append(prime)
+
+    m = 51
+    #p = 7
+    #d = 3
+    for d in range (3,4):#q in list_of_primes:#((m-1)//2)+1):
+        #m = p*int(q)
         start_time = time.time()
         save_path = r'C:\Users\sabee\PycharmProjects\PythonProject'
         filename = f"m_{m}_d_{d}_output.txt"
