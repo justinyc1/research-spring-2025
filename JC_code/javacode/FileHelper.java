@@ -11,7 +11,7 @@ public class FileHelper {
     public static void main(String[] args) throws ProjectException, IOException {
         // printDirectoryAndContents(new File(myRootDir));
         // deleteAllEmptyFiles(new File(outputsDir));
-        moveAllOutputFiles(new File(outputsDir), 1, 31);
+        moveAllOutputFiles(new File(outputsDir), 1, 60);
         
     }
 
@@ -31,7 +31,6 @@ public class FileHelper {
 
             // get m and d value, skip if m value is not in the desired range
             int m = mOf(filename);
-            int d = dOf(filename);
             if (m < mMin || m > mMax) continue;
 
             // create new directory (for m) if doesn't exist
