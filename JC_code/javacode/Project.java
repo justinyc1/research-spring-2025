@@ -35,7 +35,9 @@ public class Project {
         // test_all_m_and_d_combinations(2883, 3600, 2, 2, false, true, false, -1, "halves", false, false);
         // test_all_m_and_d_combinations(49, 49, 11, 999, false, true, false, -1, "halves", false, false);
 
-        test_all_m_and_d_combinations(51, 51, 1, 5, true, true, true, -1, "halves", false, false);
+        // test_all_m_and_d_combinations(49, 49, 11, 999, true, true, true, -1, "halves", false, false);
+
+        test_all_m_and_d_combinations(45, 100, 1, 999, true, true, false, -1, "halves", false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated, boolean overwrite_outputs, int max_seconds_allowed, String generate_method, boolean validate_halves, boolean check_sum) throws IOException {
@@ -86,8 +88,8 @@ public class Project {
 
         String filepath = "JC_code\\outputs\\";
         
-        // String filename = "output_for_m_" + m + "_d_" + d + ".txt";//TODO REVERT
-        String filename = "test2.txt";//TODO REVERT
+        String filename = "output_for_m_" + m + "_d_" + d + ".txt";//TODO REVERT
+        // String filename = "test2.txt";//TODO REVERT
         File currentFile = new File(filepath + filename);
         if (print_outputs && !allowOverwrite && currentFile.exists() && !currentFile.isDirectory()) {
             throw new ProjectException("overwrite_outputs disabled and printing to file enabled, while file for m = " + m + ", d = " + d + " already exists.");
@@ -183,15 +185,15 @@ public class Project {
 
         // if (print_outputs) pw.println("Print \"reduced\" U set (contains " + U_set.size() + " tuples): " + toStringSorted(U_set, "\n")); //DEBUG
         // if (print_outputs) pw.println("Print \"reduced\" B set (contains " + B_set.size() + " tuples): " + toString(B_set, "\n")); //DEBUG
-        if (print_outputs) pw.println("\nPrint V set (contains " + V_set.size() + " tuples): " + toStringSorted(V_set, "\n")); //DEBUG
-        if (print_outputs) pw.println("\nPrint all_are_pairs (contains " + all_are_pairs.size() + " tuples): " + toString(all_are_pairs, "\n")); //DEBUG
-        if (print_outputs) pw.println("\nPrint some_are_pairs (contains " + some_are_pairs.size() + " tuples): " + toString(some_are_pairs, "\n")); //DEBUG
-        if (print_outputs) pw.println("\nPrint none_are_pairs (contains " + none_are_pairs.size() + " tuples): " + toString(none_are_pairs, "\n")); //DEBUG
-        if (print_outputs) pw.println("\nPrint indecomposable (contains " + indecomposable.size() + " tuples): " + toString(indecomposable, "\n")); //DEBUG
-        if (print_outputs) pw.println("\nPrint decomposable but no pairs (contains " + decomposable_but_no_pairs.size() + " tuples): " + toString(decomposable_but_no_pairs, "\n")); //DEBUG
-        if (print_outputs) pw.println("\nPrint exceptional cycles (contains " + exceptional_cycles.size() + " tuples): " + toString(exceptional_cycles, "\n")); //DEBUG
+        if (print_outputs && V_set.size() <= 10000) pw.println("\nPrint V set (contains " + V_set.size() + " tuples): " + toStringSorted(V_set, "\n")); //DEBUG
+        if (print_outputs && all_are_pairs.size() <= 10000) pw.println("\nPrint all_are_pairs (contains " + all_are_pairs.size() + " tuples): " + toString(all_are_pairs, "\n")); //DEBUG
+        if (print_outputs && some_are_pairs.size() <= 10000) pw.println("\nPrint some_are_pairs (contains " + some_are_pairs.size() + " tuples): " + toString(some_are_pairs, "\n")); //DEBUG
+        if (print_outputs && none_are_pairs.size() <= 100000) pw.println("\nPrint none_are_pairs (contains " + none_are_pairs.size() + " tuples): " + toString(none_are_pairs, "\n")); //DEBUG
+        if (print_outputs && indecomposable.size() <= 100000) pw.println("\nPrint indecomposable (contains " + indecomposable.size() + " tuples): " + toString(indecomposable, "\n")); //DEBUG
+        if (print_outputs && decomposable_but_no_pairs.size() <= 100000) pw.println("\nPrint decomposable but no pairs (contains " + decomposable_but_no_pairs.size() + " tuples): " + toString(decomposable_but_no_pairs, "\n")); //DEBUG
+        if (print_outputs && exceptional_cycles.size() <= 200000) pw.println("\nPrint exceptional cycles (contains " + exceptional_cycles.size() + " tuples): " + toString(exceptional_cycles, "\n")); //DEBUG
         if (print_outputs) pw.println("\nBelow are debug outputs for each alpha in V whether it was put in the indecomposable set or the decomposable but no pairs set:");
-        if (print_outputs) pw.println(no_pair_print_buffer.toString());
+        if (print_outputs && no_pair_print_buffer.length() <= 200000) pw.println(no_pair_print_buffer.toString());
 
         PrintWriter historyLog = new PrintWriter(new FileWriter("JC_code\\outputs\\" + "log.txt", true));
         historyLog.println("Summary:");
@@ -311,7 +313,18 @@ public class Project {
         pwTesting.close();
         System.gc();
     }
-
+    
+    /* Thoughts for a possibly better recursive implementation 
+     *
+     * while first element is valid:
+     *   if list is "full" OR last element == max for that index:
+     *     pop
+     *   else:
+     *     get prev element
+     *       put prev+1 into next element
+     *       if this combination is size k and valid
+     *         add to set
+     */
     private static void find_halves_recursively(ArrayList<Tuple> firstHalves, HashMap<Integer, ArrayList<Tuple>> inversed_sum_tuples_map, int m, int m_minus_one_divided_by_two, int[] this_combination, int sum, int depth) {
         if (depth > this_combination.length) {
             return;

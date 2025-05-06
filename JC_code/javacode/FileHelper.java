@@ -1,13 +1,46 @@
 package JC_code.javacode;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+
 public class FileHelper {
     static String myRootDir = "JC_code";
     static String outputsDir = "JC_code\\outputs";
     static String myTestDir = "JC_code\\.myTest";
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ProjectException, IOException {
         // printDirectoryAndContents(new File(myRootDir));
-        deleteAllEmptyFiles(new File(outputsDir));
+        // deleteAllEmptyFiles(new File(outputsDir));
+        moveAllOutputFiles(new File(outputsDir), 1, 31);
+        
+    }
+
+    public static void moveAllOutputFiles(File directory, int mMin, int mMax) throws ProjectException, IOException {
+        for (File filename : directory.listFiles()) { // for each file in this folder
+            // if it is a folder, skip
+            if (filename.isDirectory()) {
+                continue;
+            }
+
+            // if it is empty, delete it
+            if (filename.length() == 0) {
+                if (filename.delete()) {
+                    System.out.println("\"" + filename + "\" was deleted.");
+                }
+            }
+
+            // get m and d value, skip if m value is not in the desired range
+            int m = mOf(filename);
+            int d = dOf(filename);
+            if (m < mMin || m > mMax) continue;
+
+            // create new directory (for m) if doesn't exist
+            String newDirName = "m_" + m;
+            createFolderIfNotExist(directory, newDirName);
+
+            // move current file from current folder to the new folder
+            moveFile(directory, newDirName, filename.getName());
+        }
     }
 
     public static void deleteAllEmptyFiles(File directory) {
@@ -57,5 +90,37 @@ public class FileHelper {
             sb.append(indent);
         }
         return sb.toString();
+    }
+
+    public static int mOf(File file) {
+        String filename = file.getName();
+        if (!filename.contains("output")) {
+            return -1;
+        }
+        filename = filename.substring(filename.indexOf("_m_") + 3, filename.indexOf("_d_"));
+        return Integer.parseInt(filename);
+    }
+
+    public static int dOf(File file) {
+        String filename = file.getName();
+        if (!filename.contains("output")) {
+            return -1;
+        }
+        filename = filename.substring(filename.indexOf("_d_") + 3, filename.indexOf(".txt"));
+        return Integer.parseInt(filename);
+    }
+
+    public static void createFolderIfNotExist(File path, String folderName) throws ProjectException {
+        File newDirectory = new File(path, folderName);
+        if (!newDirectory.exists()) {
+            boolean created = newDirectory.mkdir();
+            if (!created) throw new ProjectException("Error occurred when trying to create " + newDirectory.getName());   
+        }
+    }
+
+    public static void moveFile(File fromDir, String toDirName, String toMoveFileName) throws IOException {
+        Path source = fromDir.toPath().resolve(toMoveFileName);
+        Path target = fromDir.toPath().resolve(toDirName).resolve(toMoveFileName);
+        Files.move(source, target);
     }
 }
