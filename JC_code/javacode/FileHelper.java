@@ -11,7 +11,7 @@ public class FileHelper {
     public static void main(String[] args) throws ProjectException, IOException {
         // printDirectoryAndContents(new File(myRootDir));
         // deleteAllEmptyFiles(new File(outputsDir));
-        moveAllOutputFiles(new File(outputsDir), 1, 100);
+        moveAllOutputFiles(new File(outputsDir), 1, 180);
         
     }
 
