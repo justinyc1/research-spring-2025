@@ -19,8 +19,8 @@ import java.util.HashMap;
 
 public class Project {
     static long startTimeInNano = -1;
-    static int maxSecondsAllowed = -1;
-    static boolean skipToNextM = false;
+    static int maxSecondsAllowed = -1; // in seconds, var <= 0 for no limit
+    static boolean skipThisMAndD = false;
     static boolean allowOverwrite = false;
     static String generateMethod = ""; // "recursion", "halves"
     static boolean validate_split_in_halves = false;
@@ -37,7 +37,7 @@ public class Project {
 
         // test_all_m_and_d_combinations(49, 49, 11, 999, true, true, true, -1, "halves", false, false);
 
-        test_all_m_and_d_combinations(45, 100, 1, 999, true, true, false, -1, "halves", false, false);
+        test_all_m_and_d_combinations(39, 40, 10, 999, true, true, true, -1, "halves", false, false);
     }
 
     public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated, boolean overwrite_outputs, int max_seconds_allowed, String generate_method, boolean validate_halves, boolean check_sum) throws IOException {
@@ -50,19 +50,21 @@ public class Project {
         if (!automated) System.out.println("Press the Enter Key to process the next m and d values");
         sc.useDelimiter("\r"); // a single enter press is now the separator.
         for (int i = m_start; i <= m_end; ++i) {
-            skipToNextM = false;
+            if (i % 2 == 0) continue;
             // if (i % 3 != 0) continue; //DEBUG m=3q
-            for (int j = d_start; j <= (i-1)/2 && j <= d_end; ++j) {
+            int d_limit = (i-1)/2;
+            for (int j = d_start; j <= d_limit && j <= d_end; ++j) {
                 FileHelper.deleteAllEmptyFiles(new File(FileHelper.outputsDir)); // delete empty files
-                if (skipToNextM) {
-                    System.out.println("Skipping m = " + i);
-                    break;
+                if (skipThisMAndD) {
+                    skipThisMAndD = false;
+                    System.out.println("Skipping at m = " + i + ", d = " + j);
+                    j = d_limit - j;
                 }
                 System.out.println("Starting time for m = " + i + ", d = " + j + " is " + new Date());
                 try {
-                    validate_set_V(i, j, print_outputs); // m = 21, 2 <= d <= 8 is very interesting
+                    System.gc(); // free up memory
+                    validate_set_V(i, j, print_outputs);
                 } catch (ProjectException e) {
-                    // e.printStackTrace(); // DEBUG
                     continue;
                 }
                 System.out.println("Ending time for m = " + i + ", d = " + j + " is " + new Date());
@@ -87,19 +89,18 @@ public class Project {
         validate_m_and_d(m, d);
 
         String filepath = "JC_code\\outputs\\";
-        
-        String filename = "output_for_m_" + m + "_d_" + d + ".txt";//TODO REVERT
-        // String filename = "test2.txt";//TODO REVERT
+        String filename = "m_" + m + "\\output_for_m_" + m + "_d_" + d + ".txt";
         File currentFile = new File(filepath + filename);
+
+        // if allowing printing outputs IS allowed but overwriting existing output files IS NOT allowed, exception will be thrown for this m, d
         if (print_outputs && !allowOverwrite && currentFile.exists() && !currentFile.isDirectory()) {
             throw new ProjectException("overwrite_outputs disabled and printing to file enabled, while file for m = " + m + ", d = " + d + " already exists.");
         }
-        PrintWriter pw = new PrintWriter(filepath + "test2.txt");//TODO REVERT
+
+        PrintWriter pw = new PrintWriter(filepath + "\\.misc\\default_output.txt"); // default output file
         if (print_outputs) {
             pw = new PrintWriter(currentFile);
         }
-
-        if (print_outputs) pw.println("Running method validate_set_V(m = " + m + ", d = " + d + ") and generating using " + generateMethod + ":\n");
 
         long startTime = System.nanoTime();
         startTimeInNano = startTime;
@@ -166,6 +167,7 @@ public class Project {
         System.out.println(redString("decomposable & no pairs") + " set: contains " + redString(decomposable_but_no_pairs.size()) + " tuples");
         System.out.println("     " + redString("exceptional") + "_cycles" + " set: contains " + redString(exceptional_cycles.size()) + " tuples");
 
+        if (print_outputs) pw.println("Running method validate_set_V(m = " + m + ", d = " + d + ") and generating using " + generateMethod + ":\n");
         if (print_outputs) pw.println("Summary:");
         if (print_outputs) pw.println("given m = " + m + ", d = " + d);
         if (print_outputs) pw.println("Calculations took " + formattedElapsedTime + ".");
@@ -188,14 +190,14 @@ public class Project {
         if (print_outputs && V_set.size() <= 10000) pw.println("\nPrint V set (contains " + V_set.size() + " tuples): " + toStringSorted(V_set, "\n")); //DEBUG
         if (print_outputs && all_are_pairs.size() <= 10000) pw.println("\nPrint all_are_pairs (contains " + all_are_pairs.size() + " tuples): " + toString(all_are_pairs, "\n")); //DEBUG
         if (print_outputs && some_are_pairs.size() <= 10000) pw.println("\nPrint some_are_pairs (contains " + some_are_pairs.size() + " tuples): " + toString(some_are_pairs, "\n")); //DEBUG
-        if (print_outputs && none_are_pairs.size() <= 100000) pw.println("\nPrint none_are_pairs (contains " + none_are_pairs.size() + " tuples): " + toString(none_are_pairs, "\n")); //DEBUG
-        if (print_outputs && indecomposable.size() <= 100000) pw.println("\nPrint indecomposable (contains " + indecomposable.size() + " tuples): " + toString(indecomposable, "\n")); //DEBUG
-        if (print_outputs && decomposable_but_no_pairs.size() <= 100000) pw.println("\nPrint decomposable but no pairs (contains " + decomposable_but_no_pairs.size() + " tuples): " + toString(decomposable_but_no_pairs, "\n")); //DEBUG
-        if (print_outputs && exceptional_cycles.size() <= 200000) pw.println("\nPrint exceptional cycles (contains " + exceptional_cycles.size() + " tuples): " + toString(exceptional_cycles, "\n")); //DEBUG
-        if (print_outputs) pw.println("\nBelow are debug outputs for each alpha in V whether it was put in the indecomposable set or the decomposable but no pairs set:");
-        if (print_outputs && no_pair_print_buffer.length() <= 200000) pw.println(no_pair_print_buffer.toString());
+        if (print_outputs && none_are_pairs.size() <= 20000) pw.println("\nPrint none_are_pairs (contains " + none_are_pairs.size() + " tuples): " + toString(none_are_pairs, "\n")); //DEBUG
+        if (print_outputs && indecomposable.size() <= 20000) pw.println("\nPrint indecomposable (contains " + indecomposable.size() + " tuples): " + toString(indecomposable, "\n")); //DEBUG
+        if (print_outputs && decomposable_but_no_pairs.size() <= 20000) pw.println("\nPrint decomposable but no pairs (contains " + decomposable_but_no_pairs.size() + " tuples): " + toString(decomposable_but_no_pairs, "\n")); //DEBUG
+        if (print_outputs && exceptional_cycles.size() <= 20000) pw.println("\nPrint exceptional cycles (contains " + exceptional_cycles.size() + " tuples): " + toString(exceptional_cycles, "\n")); //DEBUG
+        // if (print_outputs) pw.println("\nBelow are debug outputs for each alpha in V whether it was put in the indecomposable set or the decomposable but no pairs set:");
+        // if (print_outputs && no_pair_print_buffer.length() <= 200000) pw.println(no_pair_print_buffer.toString());
 
-        PrintWriter historyLog = new PrintWriter(new FileWriter("JC_code\\outputs\\" + "log.txt", true));
+        PrintWriter historyLog = new PrintWriter(new FileWriter("JC_code\\outputs\\.misc\\" + "log.txt", true));
         historyLog.println("Summary:");
         historyLog.println("given m = " + m + ", d = " + d);
         historyLog.println("Calculations took " + formattedElapsedTime + ".");
@@ -251,7 +253,7 @@ public class Project {
         int alpha_length = 2 * d;
         int[] this_combination = new int[alpha_length];
         if (validate_split_in_halves || check_tuple_sum) {
-            debugOutput = new PrintWriter(new FileWriter("JC_code\\outputs\\" + "debug_output.txt", true));
+            debugOutput = new PrintWriter(new FileWriter("JC_code\\outputs\\.misc\\" + "debug_output.txt", true));
             recursively_find_all_check_info(V_set, ZmmZ_star, m, this_combination, 0, 1, (alpha_length-2)/2+1);
             debugOutput.close();
         } else {
@@ -275,43 +277,28 @@ public class Project {
         int[] this_combination = new int[d];
         find_halves_recursively(firstHalves, inversed_sum_tuples_map, m, m_minus_one_divided_by_two, this_combination, 0, 1);
         
-        PrintWriter pwTesting = new PrintWriter("JC_code\\outputs\\testing.txt");
-        // for (int i = 0; i < firstHalves.size(); i++) { // firstHalves
-        //     pwTesting.println(firstHalves.get(i) + " with sum = " + firstHalves.get(i).sum());
-        // }
-        // for (int sum_key : inversed_sum_tuples_map.keySet()) {
-        //     pwTesting.println("inversed sum = " + sum_key);
-        //     for (Tuple alpha : inversed_sum_tuples_map.get(sum_key)) {
-        //         pwTesting.println(alpha);
-        //     }
-        // }
-        pwTesting.println(firstHalves.size() + " " + inversed_sum_tuples_map.size());
+        // PrintWriter pwTesting = new PrintWriter("JC_code\\outputs\\.misc\\testing.txt"); // TESTING
+
+        // pwTesting.println(firstHalves.size() + " " + inversed_sum_tuples_map.size()); // TESTING
         for (int i = 0; i < firstHalves.size(); i++) {
             Tuple curr = firstHalves.get(i);
             int sum = curr.sum();
             if (!inversed_sum_tuples_map.containsKey(sum)) {
-                pwTesting.println("HASHMAP DOES NOT CONTAIN THE KEY: SUM = " + sum + " !!!");
+                // pwTesting.println("HASHMAP DOES NOT CONTAIN THE KEY: SUM = " + sum + " !!!"); // TESTING
                 continue;
             }
             int left = curr.get(curr.size()-1);
             for (Tuple alpha : inversed_sum_tuples_map.get(sum)) {
                 if (left == alpha.get(alpha.size()-1)) {
-                    pwTesting.println("END OF FIRST HALF = START OF SECOND HALF ???");
+                    // pwTesting.println("END OF FIRST HALF = START OF SECOND HALF ???"); // TESTING
                     continue;
                 }
                 put_in_V_set_if_valid(V_set, ZmmZ_star, curr.merge(alpha), m, n_halved_plus_one);
             }
         }
-        pwTesting.println(V_set.size());
-        // for (int sum_key : inversed_sum_tuples_map.keySet()) {
-        //     pwTesting.println("inversed sum = " + sum_key);
-        //     for (Tuple alpha : inversed_sum_tuples_map.get(sum_key)) {
-        //         pwTesting.println(alpha);
-        //     }
-        // }
+        // pwTesting.println(V_set.size()); // TESTING
 
-        pwTesting.close();
-        System.gc();
+        // pwTesting.close(); // TESTING
     }
     
     /* Thoughts for a possibly better recursive implementation 
@@ -707,7 +694,7 @@ public class Project {
         long elapsedInNano = System.nanoTime() - startTimeInNano;
         long elapsedInSeconds = elapsedInNano / 1000000000L;
         if (elapsedInSeconds > n) {
-            skipToNextM = true;
+            skipThisMAndD = true;
             throw new ProjectException("Time limit exceeded " + n + " seconds.");
         }
     }
@@ -774,7 +761,7 @@ public class Project {
         while (iter.hasNext()) {
             sb.append(delimiter).append(iter.next().toString()); // delimiter if theres another element
         }
-        sb.append("}");
+        sb.append("\n}");
         return sb.toString();
     }
 
