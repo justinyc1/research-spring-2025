@@ -21,6 +21,7 @@ public class Project {
     static long startTimeInNano = -1;
     static int maxSecondsAllowed = -1; // in seconds, var <= 0 for no limit
     static boolean skipThisMAndD = false;
+    static boolean terminateIfTimeLimit = false;
     static boolean allowOverwrite = false;
     static String generateMethod = ""; // "recursion", "halves"
     static boolean validate_split_in_halves = false;
@@ -29,18 +30,18 @@ public class Project {
     static int valid_tuple_sum_count = 0;
     static PrintWriter debugOutput = null;
     public static void main(String[] args) throws ProjectException, IOException {
-        // test_all_m_and_d_combinations(1246, 1600, 2, 2, false, true, false, -1, "halves", false, false);
-        // test_all_m_and_d_combinations(51, 51, 11, 15, false, true, false, -1, "halves", false, false);
-        // test_all_m_and_d_combinations(51, 51, 16, 16, false, true, false, -1, "halves", false, false);
-        // test_all_m_and_d_combinations(2883, 3600, 2, 2, false, true, false, -1, "halves", false, false);
-        // test_all_m_and_d_combinations(49, 49, 11, 999, false, true, false, -1, "halves", false, false);
+        // test_all_m_and_d_combinations(1246, 1600, 2, 2, false, true, false, -1, false, "halves", false, false);
+        // test_all_m_and_d_combinations(51, 51, 11, 15, false, true, false, -1, false, "halves", false, false);
+        // test_all_m_and_d_combinations(51, 51, 16, 16, false, true, false, -1, false, "halves", false, false);
+        // test_all_m_and_d_combinations(2883, 3600, 2, 2, false, true, false, -1, false, "halves", false, false);
+        // test_all_m_and_d_combinations(49, 49, 11, 999, false, true, false, -1, false, "halves", false, false);
 
-        // test_all_m_and_d_combinations(49, 49, 11, 999, true, true, true, -1, "halves", false, false);
+        // test_all_m_and_d_combinations(49, 49, 11, 999, true, true, true, -1, false, "halves", false, false);
 
-        test_all_m_and_d_combinations(39, 40, 10, 999, true, true, true, -1, "halves", false, false);
+        test_all_m_and_d_combinations(63, 100, 1, 999, true, true, true, 1800, false, "halves", false, false); // 30 minutes "soft" limit (if reached, finish current then skip)
     }
 
-    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated, boolean overwrite_outputs, int max_seconds_allowed, String generate_method, boolean validate_halves, boolean check_sum) throws IOException {
+    public static void test_all_m_and_d_combinations(int m_start, int m_end, int d_start, int d_end, boolean print_outputs, boolean automated, boolean overwrite_outputs, int max_seconds_allowed, boolean terminate_if_time_limit, String generate_method, boolean validate_halves, boolean check_sum) throws IOException {
         allowOverwrite = overwrite_outputs;
         maxSecondsAllowed = max_seconds_allowed;
         generateMethod = generate_method;
@@ -53,12 +54,17 @@ public class Project {
             if (i % 2 == 0) continue;
             // if (i % 3 != 0) continue; //DEBUG m=3q
             int d_limit = (i-1)/2;
+            int jSkipToValue = -1;
             for (int j = d_start; j <= d_limit && j <= d_end; ++j) {
                 FileHelper.deleteAllEmptyFiles(new File(FileHelper.outputsDir)); // delete empty files
                 if (skipThisMAndD) {
+                    System.out.printf("Previous iteration with m = %d, d = %d exceeded the %d second%s time limit.\n", i, j-1, max_seconds_allowed, plural(max_seconds_allowed));
+                    jSkipToValue = d_limit - j;
                     skipThisMAndD = false;
+                }
+                if (j <= jSkipToValue + 1) {
                     System.out.println("Skipping at m = " + i + ", d = " + j);
-                    j = d_limit - j;
+                    continue;
                 }
                 System.out.println("Starting time for m = " + i + ", d = " + j + " is " + new Date());
                 try {
@@ -161,10 +167,10 @@ public class Project {
         // System.out.println("            " + "\"reduced\" " + redString("B") + " set: contains " + redString(B_set.size()) + " tuples");
         System.out.println("                      " + redString("V") + " set: contains " + redString(V_set.size()) + " tuples");
         System.out.println("          " + redString("all") + "_are_pairs" + " set: contains " + redString(all_are_pairs.size()) + " tuples");
-        System.out.println("         " + redString("some") + "_are_pairs" + " set: contains " + redString(some_are_pairs.size()) + " tuples");
+        // System.out.println("         " + redString("some") + "_are_pairs" + " set: contains " + redString(some_are_pairs.size()) + " tuples");
         System.out.println("         " + redString("none") + "_are_pairs" + " set: contains " + redString(none_are_pairs.size()) + " tuples");
         System.out.println("         " + redString("indecomposable") + " set: contains " + redString(indecomposable.size()) + " tuples");
-        System.out.println(redString("decomposable & no pairs") + " set: contains " + redString(decomposable_but_no_pairs.size()) + " tuples");
+        // System.out.println(redString("decomposable & no pairs") + " set: contains " + redString(decomposable_but_no_pairs.size()) + " tuples");
         System.out.println("     " + redString("exceptional") + "_cycles" + " set: contains " + redString(exceptional_cycles.size()) + " tuples");
 
         if (print_outputs) pw.println("Running method validate_set_V(m = " + m + ", d = " + d + ") and generating using " + generateMethod + ":\n");
@@ -204,10 +210,10 @@ public class Project {
         historyLog.println("All ascending & non-repeating tuple (size " + 2*d + ") combinations possible for the U set: " + find_num_of_ascending_nonrepeating_tuples_in_U_set(Z_mod_m_Z, d));
         historyLog.println("                      V set: contains " + V_set.size() + " tuples");
         historyLog.println("          all_are_pairs set: contains " + all_are_pairs.size() + " tuples");
-        historyLog.println("         some_are_pairs set: contains " + some_are_pairs.size() + " tuples");
+        // historyLog.println("         some_are_pairs set: contains " + some_are_pairs.size() + " tuples");
         historyLog.println("         none_are_pairs set: contains " + none_are_pairs.size() + " tuples");
         historyLog.println("         indecomposable set: contains " + indecomposable.size() + " tuples");
-        historyLog.println("decomposable & no pairs set: contains " + decomposable_but_no_pairs.size() + " tuples");
+        // historyLog.println("decomposable & no pairs set: contains " + decomposable_but_no_pairs.size() + " tuples");
         historyLog.println("     exceptional_cycles set: contains " + exceptional_cycles.size() + " tuples");
         if ((exceptional_cycles.size()+1) * 3 != m) historyLog.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"); //DEBUG
         historyLog.println();
@@ -695,7 +701,7 @@ public class Project {
         long elapsedInSeconds = elapsedInNano / 1000000000L;
         if (elapsedInSeconds > n) {
             skipThisMAndD = true;
-            throw new ProjectException("Time limit exceeded " + n + " seconds.");
+            if (terminateIfTimeLimit) throw new ProjectException("Time limit exceeded " + n + " seconds.");
         }
     }
 
