@@ -166,19 +166,20 @@ def e_set(m, v_list):
             no_pairs.append(v_tuple)
         else:
             some_pairs.append(v_tuple)
-    print("These are the tuple(s) in the E set: ")
-    for e_tuple in tuple_list:
-        print(e_tuple)
-    print("The number of tuple(s) is", count)
-    print("These tuples have no pairs that add to m =", m, )
-    for no_pairs_tuple in no_pairs:
-        print(no_pairs_tuple)
-    print("The number of tuple(s) is", len(no_pairs))
-    print("These tuples have some (but not all) pairs that add to m =", m, )
-    for some_pairs_tuple in some_pairs:
-        print(some_pairs_tuple)
-    print("The number of tuple(s) is", len(some_pairs))
-    print()
+    # PRINTING
+    # print("These are the tuple(s) in the E set: ")
+    # for e_tuple in tuple_list:
+    #     print(e_tuple)
+    # print("The number of tuple(s) is", count)
+    # print("These tuples have no pairs that add to m =", m, )
+    # for no_pairs_tuple in no_pairs:
+    #     print(no_pairs_tuple)
+    # print("The number of tuple(s) is", len(no_pairs))
+    # print("These tuples have some (but not all) pairs that add to m =", m, )
+    # for some_pairs_tuple in some_pairs:
+    #     print(some_pairs_tuple)
+    # print("The number of tuple(s) is", len(some_pairs))
+    # print()
     return tuple_list, no_pairs
 
 
