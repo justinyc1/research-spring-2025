@@ -207,11 +207,11 @@ def indecomposable(m, d, no_pairs):
                     if sum(combo) % m == 0:
                         tuple_list.remove(e_tuple)
                         break
-
-    print("These are the exceptional tuple(s) that are indecomposable: ")
-    for ind_tuple in tuple_list:
-        print(ind_tuple)
-    print("The number of tuple(s) is", len(tuple_list))
+    # PRINTING
+    # print("These are the exceptional tuple(s) that are indecomposable: ")
+    # for ind_tuple in tuple_list:
+    #     print(ind_tuple)
+    # print("The number of tuple(s) is", len(tuple_list))
     return tuple_list
 
 
